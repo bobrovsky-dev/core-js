@@ -1,5 +1,15 @@
 import './internal/b'
 
+import Type from './lib/type'
+import Browser from './lib/browser'
+import Text from './lib/text'
+
+export {
+    Type,
+    Browser,
+    Text
+}
+
 export * from './libs'
 
 if (global && global.window && global.window.B)

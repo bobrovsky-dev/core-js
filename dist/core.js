@@ -26,25 +26,48 @@
 
       babelHelpers.createClass(Type, null, [{
         key: "isEmpty",
+
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
         value: function isEmpty(value) {
           if (this.isArray(value) || this.isString(value)) return value.length === 0;
           if (this.isNumber(value)) return value === 0;
           if (this.isBoolean(value)) return value === false;
           if (this.isObject(value)) return this.isEmpty(Object.getOwnPropertyNames(value));
-          if (this.isNil(value)) return true;
-          return false;
+          return this.isNil(value);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isString",
         value: function isString(value) {
           return typeof value === 'string';
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isSymbol",
         value: function isSymbol(value) {
           var type = babelHelpers.typeof(value);
           return type == 'symbol' || type === 'object' && value != null && Object.prototype.toString.call(value) == '[object Symbol]';
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {string}
+         */
+
       }, {
         key: "toString",
         value: function toString(value) {
@@ -64,21 +87,45 @@
           var result = "".concat(value);
           return result == '0' && 1 / value == -(1 / 0) ? '-0' : result;
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isFunction",
         value: function isFunction(value) {
           return typeof value === 'function';
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isObject",
         value: function isObject(value) {
           return !!value && (babelHelpers.typeof(value) === 'object' || typeof value === 'function');
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isObjectLike",
         value: function isObjectLike(value) {
           return !!value && babelHelpers.typeof(value) === 'object';
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isPlainObject",
         value: function isPlainObject(value) {
@@ -95,11 +142,24 @@
           var ctor = proto.hasOwnProperty('constructor') && proto.constructor;
           return typeof ctor === 'function' && Function.prototype.toString.call(ctor) === Function.prototype.toString.call(Object);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isBoolean",
         value: function isBoolean(value) {
           return value === true || value === false;
         }
+        /**
+         *
+         * @param {any} value
+         * @param {array} trueValues
+         * @returns {boolean}
+         */
+
       }, {
         key: "toBoolean",
         value: function toBoolean(value) {
@@ -107,82 +167,178 @@
           var transformedValue = this.isString(value) ? value.toLowerCase() : value;
           return ['true', 'y', '1', 1, true].concat(babelHelpers.toConsumableArray(trueValues)).includes(transformedValue);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isNumber",
         value: function isNumber(value) {
           return typeof value === 'number' && !isNaN(value);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {number}
+         */
+
       }, {
         key: "toNumber",
         value: function toNumber(value) {
           var parsedValue = parseFloat(value);
           return this.isNumber(parsedValue) ? parsedValue : 0;
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isInteger",
         value: function isInteger(value) {
           return this.isNumber(value) && value % 1 === 0;
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {number}
+         */
+
       }, {
         key: "toInteger",
         value: function toInteger(value) {
           return this.toNumber(parseInt(value, 10));
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isFloat",
         value: function isFloat(value) {
           return this.isNumber(value) && !this.isInteger(value);
         }
+        /**
+         *
+         * @param {any} value
+         * @returns {number}
+         */
+
       }, {
         key: "toFloat",
         value: function toFloat(value) {
           return parseFloat(value);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isNil",
         value: function isNil(value) {
           return value === null || value === undefined;
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isArray",
         value: function isArray(value) {
           return !this.isNil(value) && Array.isArray(value);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isDate",
         value: function isDate(value) {
           return this.isObjectLike(value) && Object.prototype.toString.call(value) === '[object Date]';
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isDomNode",
         value: function isDomNode(value) {
           return this.isObjectLike(value) && !this.isPlainObject(value) && 'nodeType' in value;
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isPrototype",
         value: function isPrototype(value) {
           return (typeof (value && value.constructor) === 'function' && value.constructor.prototype || Object.prototype) === value;
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isNull",
         value: function isNull(value) {
           return value === null;
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isUndefined",
         value: function isUndefined(value) {
           return typeof value === 'undefined';
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isBlob",
         value: function isBlob(value) {
           return this.isObjectLike(value) && this.isNumber(value.size) && this.isString(value.type) && this.isFunction(value.slice);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isFile",
         value: function isFile(value) {
           return this.isBlob(value) && this.isObjectLike(value.lastModifiedDate) && this.isNumber(value.lastModified) && this.isString(value.name);
         }
+        /**
+         *
+         * @param {*} value
+         * @returns {boolean}
+         */
+
       }, {
         key: "isFormData",
         value: function isFormData(value) {
@@ -190,189 +346,6 @@
         }
       }]);
       return Type;
-    }();
-
-    // @ts-ignore
-    var reEscape = /[&<>'"]/g;
-    var reUnescape = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
-    var escapeEntities = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    };
-    var unescapeEntities = {
-      '&amp;': '&',
-      '&#38;': '&',
-      '&lt;': '<',
-      '&#60;': '<',
-      '&gt;': '>',
-      '&#62;': '>',
-      '&apos;': "'",
-      '&#39;': "'",
-      '&quot;': '"',
-      '&#34;': '"'
-    };
-
-    var Text = /*#__PURE__*/function () {
-      function Text() {
-        babelHelpers.classCallCheck(this, Text);
-      }
-
-      babelHelpers.createClass(Text, null, [{
-        key: "encode",
-        value: function encode(value) {
-          if (Type.isString(value)) {
-            return value.replace(reEscape, function (item) {
-              return escapeEntities[item];
-            });
-          }
-
-          return value;
-        }
-      }, {
-        key: "decode",
-        value: function decode(value) {
-          if (Type.isString(value)) {
-            return value.replace(reUnescape, function (item) {
-              return unescapeEntities[item];
-            });
-          }
-
-          return value;
-        }
-      }, {
-        key: "getRandom",
-        value: function getRandom() {
-          var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
-          return babelHelpers.toConsumableArray(Array(length)).map(function () {
-            return (~~(Math.random() * 36)).toString(36);
-          }).join('');
-        }
-      }, {
-        key: "toCamelCase",
-        value: function toCamelCase(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          var regex = /[-_\s]+(.)?/g;
-
-          if (!regex.test(str)) {
-            return str.match(/^[A-Z]+$/) ? str.toLowerCase() : str[0].toLowerCase() + str.slice(1);
-          }
-
-          str = str.toLowerCase();
-          str = str.replace(regex, function (match, letter) {
-            return letter ? letter.toUpperCase() : '';
-          });
-          return str[0].toLowerCase() + str.substr(1);
-        }
-      }, {
-        key: "toPascalCase",
-        value: function toPascalCase(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          return this.capitalize(this.toCamelCase(str));
-        }
-      }, {
-        key: "toKebabCase",
-        value: function toKebabCase(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          var matches = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
-
-          if (!matches) {
-            return str;
-          }
-
-          return matches.map(function (x) {
-            return x.toLowerCase();
-          }).join('-');
-        }
-      }, {
-        key: "capitalize",
-        value: function capitalize(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          return str[0].toUpperCase() + str.substr(1);
-        }
-      }, {
-        key: "isIn",
-        value: function isIn(symbol, string) {
-          string = Type.toString(string);
-          return string.indexOf(Type.toString(symbol)) !== -1;
-        }
-      }, {
-        key: "trim",
-        value: function trim(value) {
-          if (Type.isString(value)) return value.trim();
-          return value;
-        }
-      }, {
-        key: "truncate",
-        value: function truncate(string, length) {
-          var suffix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
-          string = Type.toString(string);
-          return string.length > length ? this.trim(string.substr(0, length)) + suffix : string;
-        }
-      }, {
-        key: "replaceMacros",
-        value: function replaceMacros(string, rules) {
-          var tagStart = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "#";
-          var tagEnd = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "#";
-
-          if (Type.isObjectLike(rules)) {
-            var macros = {};
-            Object.keys(rules).forEach(function (key) {
-              macros[tagStart + key + tagEnd] = rules[key];
-            });
-            string = Text.replace(string, macros);
-          }
-
-          return string;
-        }
-      }, {
-        key: "replace",
-        value: function replace(string, rules) {
-          var flag = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'g';
-          string = Type.toString(string);
-
-          if (Type.isObjectLike(rules)) {
-            Object.keys(rules).forEach(function (key) {
-              string = string.replace(new RegExp(key, flag), rules[key]);
-            });
-          }
-
-          return string;
-        }
-      }, {
-        key: "nl2br",
-        value: function nl2br(value) {
-          if (!value || !value.replace) return value;
-          return value.replace(/([^>])\n/g, '$1<br/>');
-        }
-      }, {
-        key: "stripTags",
-        value: function stripTags(value) {
-          if (!value || !value.split) return value;
-          return value.split(/<[^>]+>/g).join('');
-        }
-      }, {
-        key: "stripPhpTags",
-        value: function stripPhpTags(value) {
-          if (!value || !value.replace) return value;
-          return value.replace(/<\?(.|[\r\n])*?\?>/g, '');
-        }
-      }]);
-      return Text;
     }();
 
     var UA = navigator.userAgent.toLowerCase();
@@ -611,6 +584,286 @@
       return Browser;
     }();
 
+    var reEscape = /[&<>'"]/g;
+    var reUnescape = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
+    var escapeEntities = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    };
+    var unescapeEntities = {
+      '&amp;': '&',
+      '&#38;': '&',
+      '&lt;': '<',
+      '&#60;': '<',
+      '&gt;': '>',
+      '&#62;': '>',
+      '&apos;': "'",
+      '&#39;': "'",
+      '&quot;': '"',
+      '&#34;': '"'
+    };
+
+    var Text = /*#__PURE__*/function () {
+      function Text() {
+        babelHelpers.classCallCheck(this, Text);
+      }
+
+      babelHelpers.createClass(Text, null, [{
+        key: "encode",
+
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+        value: function encode(value) {
+          if (Type.isString(value)) {
+            return value.replace(reEscape, function (item) {
+              return escapeEntities[item];
+            });
+          }
+
+          return value;
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "decode",
+        value: function decode(value) {
+          if (Type.isString(value)) {
+            return value.replace(reUnescape, function (item) {
+              return unescapeEntities[item];
+            });
+          }
+
+          return value;
+        }
+        /**
+         *
+         * @param {number} length
+         * @returns {string}
+         */
+
+      }, {
+        key: "getRandom",
+        value: function getRandom() {
+          var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
+          return babelHelpers.toConsumableArray(Array(length)).map(function () {
+            return (~~(Math.random() * 36)).toString(36);
+          }).join('');
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "toCamelCase",
+        value: function toCamelCase(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          var regex = /[-_\s]+(.)?/g;
+
+          if (!regex.test(str)) {
+            return str.match(/^[A-Z]+$/) ? str.toLowerCase() : str[0].toLowerCase() + str.slice(1);
+          }
+
+          str = str.toLowerCase();
+          str = str.replace(regex, function (match, letter) {
+            return letter ? letter.toUpperCase() : '';
+          });
+          return str[0].toLowerCase() + str.substr(1);
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "toPascalCase",
+        value: function toPascalCase(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          return this.capitalize(this.toCamelCase(str));
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "toKebabCase",
+        value: function toKebabCase(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          var matches = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
+
+          if (!matches) {
+            return str;
+          }
+
+          return matches.map(function (x) {
+            return x.toLowerCase();
+          }).join('-');
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "capitalize",
+        value: function capitalize(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          return str[0].toUpperCase() + str.substr(1);
+        }
+        /**
+         *
+         * @param {string} symbol
+         * @param {string} string
+         * @returns {boolean}
+         */
+
+      }, {
+        key: "isIn",
+        value: function isIn(symbol, string) {
+          string = Type.toString(string);
+          return string.indexOf(Type.toString(symbol)) !== -1;
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "trim",
+        value: function trim(value) {
+          if (Type.isString(value)) return value.trim();
+          return value;
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {number} length
+         * @param {string} suffix
+         * @returns {string}
+         */
+
+      }, {
+        key: "truncate",
+        value: function truncate(string, length) {
+          var suffix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+          string = Type.toString(string);
+          return string.length > length ? this.trim(string.substr(0, length)) + suffix : string;
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {object} rules
+         * @param {string} tagStart
+         * @param {string} tagEnd
+         * @returns {string}
+         */
+
+      }, {
+        key: "replaceMacros",
+        value: function replaceMacros(string, rules) {
+          var tagStart = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "#";
+          var tagEnd = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "#";
+
+          if (Type.isObjectLike(rules)) {
+            var macros = {};
+            Object.keys(rules).forEach(function (key) {
+              macros[tagStart + key + tagEnd] = rules[key];
+            });
+            string = Text.replace(string, macros);
+          }
+
+          return string;
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {object} rules
+         * @param {string} flag
+         * @returns {string}
+         */
+
+      }, {
+        key: "replace",
+        value: function replace(string, rules) {
+          var flag = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'g';
+          string = Type.toString(string);
+
+          if (Type.isObjectLike(rules)) {
+            Object.keys(rules).forEach(function (key) {
+              string = string.replace(new RegExp(key, flag), rules[key]);
+            });
+          }
+
+          return string;
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "nl2br",
+        value: function nl2br(value) {
+          if (!value || !value.replace) return value;
+          return value.replace(/([^>])\n/g, '$1<br/>');
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "stripTags",
+        value: function stripTags(value) {
+          if (!value || !value.split) return value;
+          return value.split(/<[^>]+>/g).join('');
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "stripPhpTags",
+        value: function stripPhpTags(value) {
+          if (!value || !value.replace) return value;
+          return value.replace(/<\?(.|[\r\n])*?\?>/g, '');
+        }
+      }]);
+      return Text;
+    }();
+
     var Event = /*#__PURE__*/function () {
       function Event() {
         babelHelpers.classCallCheck(this, Event);
@@ -627,7 +880,7 @@
 
         this.handled = false;
         /**
-         * Данные, которые приходят из [[CustomEvents.on()]] когда прикрепляется обработчик события.
+         * Данные, которые приходят из [[Event.on()]] когда прикрепляется обработчик события.
          * @type {*}
          */
 
@@ -640,7 +893,7 @@
         this.events = new WeakMap();
       }
       /**
-       * Получает массив событий из объекта
+       * Получает массив событий из WeakMap
        * @param {Object} eventObject
        * @returns {Object}
        */
@@ -680,7 +933,7 @@
           var events = this._get(eventObject);
 
           if (!Type.isArray(events[eventName])) events[eventName] = [];
-          if (append) events[eventName].push([eventHandler, data]);else events[eventName].unshift([eventHandler, data]);
+          if (!!append) events[eventName].push([eventHandler, data]);else events[eventName].unshift([eventHandler, data]);
           this.events.set(eventObject, events);
         }
         /**
@@ -727,7 +980,7 @@
          * @param {Object|string} eventObject
          * @param {string|Object} eventName
          * @param {Array|null} eventParams
-         * @param {null|undefined} event
+         * @param {Event} event
          */
 
       }, {
@@ -776,17 +1029,73 @@
       return Event;
     }();
 
+    var type = babelHelpers.objectSpread({}, Object.getOwnPropertyNames(Type).filter(function (key) {
+      return !['name', 'length', 'prototype', 'caller', 'arguments'].includes(key);
+    }).reduce(function (acc, key) {
+      acc[key] = Type[key];
+      return acc;
+    }, {}), {
+      isNotEmptyString: function isNotEmptyString(value) {
+        return Type.isString(value) && value !== '';
+      },
+      isNotEmptyObject: function isNotEmptyObject(value) {
+        return Type.isObjectLike(value) && Object.keys(value).length > 0;
+      },
+      isMapKey: Type.isObject,
+      stringToInt: function stringToInt(value) {
+        var parsed = parseInt(value);
+        return !Number.isNaN(parsed) ? parsed : 0;
+      }
+    });
+    var browser = {
+      IsOpera: Browser.isOpera,
+      IsIE: Browser.isIE,
+      IsIE6: Browser.isIE6,
+      IsIE7: Browser.isIE7,
+      IsIE8: Browser.isIE8,
+      IsIE9: Browser.isIE9,
+      IsIE10: Browser.isIE10,
+      IsIE11: Browser.isIE11,
+      IsSafari: Browser.isSafari,
+      IsFirefox: Browser.isFirefox,
+      IsChrome: Browser.isChrome,
+      DetectIeVersion: Browser.detectIEVersion,
+      IsMac: Browser.isMac,
+      IsAndroid: Browser.isAndroid,
+      isIPad: Browser.isIPad,
+      isIPhone: Browser.isIPhone,
+      IsIOS: Browser.isIOS,
+      IsMobile: Browser.isMobile,
+      isRetina: Browser.isRetina,
+      IsDoctype: Browser.isDoctype,
+      SupportLocalStorage: Browser.isLocalStorageSupported,
+      addGlobalClass: Browser.addGlobalClass,
+      DetectAndroidVersion: Browser.detectAndroidVersion,
+      isPropertySupported: Browser.isPropertySupported,
+      addGlobalFeatures: Browser.addGlobalFeatures
+    };
     var event = new Event();
+    var on = event.on,
+        off = event.off,
+        trigger = event.trigger;
+    var getRandom = Text.getRandom,
+        replaceMacros = Text.replaceMacros;
 
     if (global && global.window && global.window.B) {
       Object.assign(global.window.B, exports);
     }
 
     exports.Type = Type;
-    exports.Text = Text;
     exports.Browser = Browser;
-    exports.Event = Event;
+    exports.Text = Text;
+    exports.type = type;
+    exports.browser = browser;
     exports.event = event;
+    exports.on = on;
+    exports.off = off;
+    exports.trigger = trigger;
+    exports.getRandom = getRandom;
+    exports.replaceMacros = replaceMacros;
 
 }((this.B = this.B || {})));
 
