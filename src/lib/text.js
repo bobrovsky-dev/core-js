@@ -265,4 +265,107 @@ export default class Text
 
         return value.replace(/<\?(.|[\r\n])*?\?>/g, '')
     }
+
+    /**
+     * Взрывает строку в массив, опционально обрезает значения и пропускает пустые
+     *
+     * @param {string} value
+     * @param {string} separator
+     * @param {boolean} trim
+     * @param {boolean} skipEmpty
+     * @returns {array}
+     */
+    static explode(value, separator = ',', trim = true, skipEmpty = false)
+    {
+        value = Type.toString(value)
+        let result = value.split(separator)
+        if (!!trim)
+        {
+            result = result.map(i => this.trim(i))
+        }
+        if (skipEmpty)
+        {
+            result = result.filter(i => i !== "")
+        }
+
+        return result
+    }
+
+    /**
+     * Метод для обрезания строк.
+     *
+     * @param {string} value
+     * @param {number} offset
+     * @param {number|null} length
+     * @returns {string}
+     */
+    static cut(value, offset, length = null)
+    {
+        value = Type.toString(value)
+        return value.substr(offset, length)
+    }
+
+    /**
+     * Возвращает позицию подстроки в строке.
+     *
+     * @param {string} needle Подстрока.
+     * @param {string} haystack Строка.
+     * @param {number} offset Смещение.
+     * @param {boolean} insensitive Нечювствительность к регистру.
+     * @param {boolean} last Искать последнюю подстроку.
+     * @returns {number|false} Позиция, с которой начинается первая или последняя найденная подстрока или `false`, если подстрока не найдена.
+     */
+    static position(needle, haystack, offset = 0, insensitive = false, last = false)
+    {
+        needle = Type.toString(needle)
+        haystack = Type.toString(haystack)
+
+        if (insensitive)
+        {
+            haystack = haystack.toLowerCase()
+            needle = needle.toLowerCase()
+        }
+
+        let pos = haystack.indexOf(needle, offset)
+
+        if (last)
+        {
+            offset = pos
+
+            while (true)
+            {
+                let res = haystack.indexOf(needle, offset += 1)
+
+                if (res == -1) break
+
+                pos = res
+            }
+        }
+
+        return pos >= 0 ? pos : false
+    }
+    
+    /**
+     * Сравнивкт две строки
+     *
+     * @param {string} value1 Первая строка для сравнения.
+     * @param {string} value2 Вторая строка для сравнения.
+     * @param {number} length Количество сравневаемых символов. Если 0, то сравнивает всю строку.
+     * @param {boolean} insensitive Нечювствительность к регистру.
+     * @returns {boolean} Результат сравнения.
+     */
+    static compare(value1, value2, length = 0, insensitive = false)
+    {
+        value1 = Type.toString(value1)
+        value2 = Type.toString(value2)
+        length = Type.toInteger(length)
+
+        if (length > 0)
+        {
+            value1 = this.cut(value1, 0, length)
+            value2 = this.cut(value2, 0, length)
+        }
+
+        return this.position(value1, value2, 0, insensitive, false) === 0
+    }
 }

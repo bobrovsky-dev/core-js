@@ -3,11 +3,13 @@ import './internal/b'
 import Type from './lib/type'
 import Browser from './lib/browser'
 import Text from './lib/text'
+import Arrays from './lib/arrays'
 
 export {
     Type,
     Browser,
-    Text
+    Text,
+    Arrays,
 }
 
 export * from './libs'

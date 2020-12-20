@@ -4,7 +4,7 @@ module.exports = {
     namespace: 'B',
     namespaceFunction: null,
     adjustConfigPhp: false,
-    protected: true,
+    // protected: true,
     concat: {
         js: [
             './src/internal/wrap-start.js',

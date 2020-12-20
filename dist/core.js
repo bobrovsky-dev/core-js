@@ -860,8 +860,204 @@
           if (!value || !value.replace) return value;
           return value.replace(/<\?(.|[\r\n])*?\?>/g, '');
         }
+        /**
+         * Взрывает строку в массив, опционально обрезает значения и пропускает пустые
+         *
+         * @param {string} value
+         * @param {string} separator
+         * @param {boolean} trim
+         * @param {boolean} skipEmpty
+         * @returns {array}
+         */
+
+      }, {
+        key: "explode",
+        value: function explode(value) {
+          var _this = this;
+
+          var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
+          var trim = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+          var skipEmpty = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+          value = Type.toString(value);
+          var result = value.split(separator);
+
+          if (!!trim) {
+            result = result.map(function (i) {
+              return _this.trim(i);
+            });
+          }
+
+          if (skipEmpty) {
+            result = result.filter(function (i) {
+              return i !== "";
+            });
+          }
+
+          return result;
+        }
+        /**
+         * Метод для обрезания строк.
+         *
+         * @param {string} value
+         * @param {number} offset
+         * @param {number|null} length
+         * @returns {string}
+         */
+
+      }, {
+        key: "cut",
+        value: function cut(value, offset) {
+          var length = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+          value = Type.toString(value);
+          return value.substr(offset, length);
+        }
+        /**
+         * Возвращает позицию подстроки в строке.
+         *
+         * @param {string} needle Подстрока.
+         * @param {string} haystack Строка.
+         * @param {number} offset Смещение.
+         * @param {boolean} insensitive Нечювствительность к регистру.
+         * @param {boolean} last Искать последнюю подстроку.
+         * @returns {number|false} Позиция, с которой начинается первая или последняя найденная подстрока или `false`, если подстрока не найдена.
+         */
+
+      }, {
+        key: "position",
+        value: function position(needle, haystack) {
+          var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+          var insensitive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+          var last = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+          needle = Type.toString(needle);
+          haystack = Type.toString(haystack);
+
+          if (insensitive) {
+            haystack = haystack.toLowerCase();
+            needle = needle.toLowerCase();
+          }
+
+          var pos = haystack.indexOf(needle, offset);
+
+          if (last) {
+            offset = pos;
+
+            while (true) {
+              var res = haystack.indexOf(needle, offset += 1);
+              if (res == -1) break;
+              pos = res;
+            }
+          }
+
+          return pos >= 0 ? pos : false;
+        }
+        /**
+         * Сравнивкт две строки
+         *
+         * @param {string} value1 Первая строка для сравнения.
+         * @param {string} value2 Вторая строка для сравнения.
+         * @param {number} length Количество сравневаемых символов. Если 0, то сравнивает всю строку.
+         * @param {boolean} insensitive Нечювствительность к регистру.
+         * @returns {boolean} Результат сравнения.
+         */
+
+      }, {
+        key: "compare",
+        value: function compare(value1, value2) {
+          var length = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+          var insensitive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+          value1 = Type.toString(value1);
+          value2 = Type.toString(value2);
+          length = Type.toInteger(length);
+
+          if (length > 0) {
+            value1 = this.cut(value1, 0, length);
+            value2 = this.cut(value2, 0, length);
+          }
+
+          return this.position(value1, value2, 0, insensitive, false) === 0;
+        }
       }]);
       return Text;
+    }();
+
+    var Arrays = /*#__PURE__*/function () {
+      function Arrays() {
+        babelHelpers.classCallCheck(this, Arrays);
+      }
+
+      babelHelpers.createClass(Arrays, null, [{
+        key: "getValues",
+
+        /**
+         * Возвращает значения массива с новыми ключами
+         *
+         * @param {array|object} array
+         * @returns {array}
+         */
+        value: function getValues(array) {
+          if (Type.isArray(array)) return this.clean(array);
+          return this.getValuesObject(array);
+        }
+        /**
+         * Возвращает массив ключей массива
+         *
+         * @param {array|object} array
+         * @param {boolean} convertString
+         * @returns {array}
+         */
+
+      }, {
+        key: "getKeys",
+        value: function getKeys(array) {
+          var convertString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+          if (Type.isArray(array)) return this.clean(array.map(function (v, i) {
+            return convertString ? i.toString() : i;
+          }));
+          return this.getKeysObject(array);
+        }
+        /**
+         * Возвращает массив значений объекта
+         *
+         * @param {object} object
+         * @returns {array}
+         */
+
+      }, {
+        key: "getValuesObject",
+        value: function getValuesObject(object) {
+          if (Type.isObjectLike(object)) return this.clean(Object.values(object));
+          return [];
+        }
+        /**
+         * Возвращает массив ключей объекта
+         *
+         * @param {object} object
+         * @returns {array}
+         */
+
+      }, {
+        key: "getKeysObject",
+        value: function getKeysObject(object) {
+          if (Type.isObjectLike(object)) return this.clean(Object.keys(object));
+          return [];
+        }
+        /**
+         * Очищает значения массива от null или undefined
+         *
+         * @param {array} array
+         * @returns {array}
+         */
+
+      }, {
+        key: "clean",
+        value: function clean(array) {
+          if (Type.isArray(array)) return array.filter(function (value) {
+            return !Type.isNil(value);
+          });
+          return [];
+        }
+      }]);
+      return Arrays;
     }();
 
     var Event = /*#__PURE__*/function () {
@@ -1088,6 +1284,7 @@
     exports.Type = Type;
     exports.Browser = Browser;
     exports.Text = Text;
+    exports.Arrays = Arrays;
     exports.type = type;
     exports.browser = browser;
     exports.event = event;
