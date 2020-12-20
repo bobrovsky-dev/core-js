@@ -25,6 +25,7 @@ const unescapeEntities = {
     '&#34;': '"',
 }
 
+
 export default class Text
 {
     /**
@@ -344,7 +345,7 @@ export default class Text
 
         return pos >= 0 ? pos : false
     }
-    
+
     /**
      * Сравнивкт две строки
      *

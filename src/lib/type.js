@@ -220,6 +220,7 @@ export default class Type
         return value === null || value === undefined
     }
 
+
     /**
      *
      * @param {*} value
