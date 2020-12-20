@@ -42,7 +42,7 @@ export default class Arrays
         if(Type.isObjectLike(object))
             return this.clean(Object.values(object))
 
-        return [];
+        return []
     }
 
     /**
@@ -56,7 +56,7 @@ export default class Arrays
         if(Type.isObjectLike(object))
             return this.clean(Object.keys(object))
 
-        return [];
+        return []
     }
 
     /**
