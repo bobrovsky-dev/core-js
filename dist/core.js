@@ -763,19 +763,92 @@
           return value;
         }
         /**
+         * Заменяет текст внутри части строки.
          *
-         * @param {string} string
-         * @param {number} length
-         * @param {string} suffix
+         * @param {string} string Входная строка.
+         * @param {string} replacement Строка замены.
+         * @param {number} start Позиция для начала замены подстроки at.
+         * Если start неотрицателен, то замена начнется с начального смещения в строку.
+         * Если start отрицательный, то замена начнется с начального символа в конце строки.
+         * @param {number|null} length Длина подстроки, подлежащей замене.
+         * Если задано и положительно, то оно представляет собой длину части строки, которая должна быть заменена.
+         * Если он отрицательный, то представляет собой количество символов от конца строки, на котором следует прекратить замену.
+         * Если он не задан, то по умолчанию он будет равен длине строки, то есть завершит замену в конце строки.
+         * Если длина равна нулю, то эта функция будет иметь эффект вставки замены в строку при заданном начальном смещении.
+         *
          * @returns {string}
          */
 
       }, {
-        key: "truncate",
-        value: function truncate(string, length) {
-          var suffix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+        key: "replaceSubstring",
+        value: function replaceSubstring(string, replacement, start) {
+          var length = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
           string = Type.toString(string);
-          return string.length > length ? this.trim(string.substr(0, length)) + suffix : string;
+          var stringLength = string.length;
+          if (start < 0) start = Math.max(0, stringLength + start);else if (start > stringLength) start = stringLength;
+          if (length !== null && length < 0) length = Math.max(0, stringLength - start + length);else if (length === null || length > stringLength) length = stringLength;
+          if (start + length > stringLength) length = stringLength - start;
+          return string.substr(0, start) + replacement + string.substr(start + length, stringLength - start - length);
+        }
+        /**
+         * Усекает строку от начала до указанного количества символов.
+         *
+         * @param {string} string Строка для обработки.
+         * @param {number} length Максимальная длина усеченной строки, включая маркер обрезки.
+         * @param {string} trimMarker Строка для добавления в начало.
+         * @returns {string}
+         */
+
+      }, {
+        key: "truncateBegin",
+        value: function truncateBegin(string, length) {
+          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+          string = Type.toString(string);
+          var stringLength = string.length;
+          if (stringLength <= length) return string;
+          trimMarker = Type.toString(trimMarker);
+          var trimMarkerLength = trimMarker.length;
+          return this.replaceSubstring(string, trimMarker, 0, -length + trimMarkerLength);
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {number} length
+         * @param {string} trimMarker
+         * @returns {string}
+         */
+
+      }, {
+        key: "truncateMiddle",
+        value: function truncateMiddle(string, length) {
+          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+          string = Type.toString(string);
+          var stringLength = string.length;
+          if (stringLength <= length) return string;
+          trimMarker = Type.toString(trimMarker);
+          var trimMarkerLength = trimMarker.length;
+          var start = Type.toInteger(Math.ceil((length - trimMarkerLength) / 2));
+          var end = length - start - trimMarkerLength;
+          return this.replaceSubstring(string, trimMarker, start, -end);
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {number} length
+         * @param {string} trimMarker
+         * @returns {string}
+         */
+
+      }, {
+        key: "truncateEnd",
+        value: function truncateEnd(string, length) {
+          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+          string = Type.toString(string);
+          var stringLength = string.length;
+          if (stringLength <= length) return string;
+          trimMarker = Type.toString(trimMarker);
+          var trimMarkerLength = trimMarker.length;
+          return this.trim(string.substr(0, length - trimMarkerLength)) + trimMarker;
         }
         /**
          *
@@ -980,6 +1053,12 @@
       return Text;
     }();
 
+    function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+    function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+    function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
     var Arrays = /*#__PURE__*/function () {
       function Arrays() {
         babelHelpers.classCallCheck(this, Arrays);
@@ -1055,6 +1134,244 @@
             return !Type.isNil(value);
           });
           return [];
+        }
+        /**
+         * Проверяет, присутствует ли в массиве или объекте указанный ключ
+         *
+         * @param {string|number} key
+         * @param {array|object} array
+         * @returns {boolean}
+         */
+
+      }, {
+        key: "keyExists",
+        value: function keyExists(key, array) {
+          if (Type.isArray(array)) return array.hasOwnProperty(key);
+          if (Type.isObjectLike(array)) return key in array;
+          return false;
+        }
+        /**
+         * Проверяет, присутствует ли в массиве или объекте значение
+         *
+         * @param value
+         * @param array
+         * @returns {boolean}
+         */
+
+      }, {
+        key: "isIn",
+        value: function isIn(value, array) {
+          if (Type.isArray(array)) return array.indexOf(value) >= 0;
+
+          if (Type.isObjectLike(array)) {
+            var keys = Object.keys(array);
+
+            for (var _i = 0, _keys = keys; _i < _keys.length; _i++) {
+              var key = _keys[_i];
+
+              if (array[key] === value) {
+                return true;
+              }
+            }
+          }
+
+          return false;
+        }
+        /**
+         *  Возращает значение элемента, если оно найдено, в противном случае значение по умолчанию
+         *
+         * @param {array} array
+         * @param {string|number} key
+         * @param {mixed} defaultValue
+         * @returns {mixed}
+         */
+
+      }, {
+        key: "getRootValue",
+        value: function getRootValue(array, key, defaultValue) {
+          return this.keyExists(key, array) ? array[key] : defaultValue;
+        }
+        /**
+         * Извлекает значение элемента массива или объекта с заданным ключом или именем свойства.
+         * Если ключ не существует в массиве или объекте, вместо него будет возвращено значение по умолчанию.
+         *
+         * Ниже приведены некоторые примеры использования,
+         *
+         * работа с массивом
+         * B.Arrays.getValue(array, 1)
+         *
+         * работа с объектом
+         * B.Arrays.getValue(object, 'one')
+         *
+         * работа с функцией
+         * B.Arrays.getValue(user, function(user, default, value) {
+         *     return user.firstName + ' ' + user.lastName
+         * })
+         *
+         * использование точечного формата для получения значения встроенного объекта или массива
+         *
+         * B.Arrays.getValue(array, '1.2')
+         * B.Arrays.getValue(array, [1, 2])
+         * B.Arrays.getValue(object, 'one.two')
+         * B.Arrays.getValue(object, ['one', 'two'])
+         *
+         *
+         * @param {array|object} array
+         * @param {string|number|function|array} key
+         * @param {mixed} defaultValue
+         * @returns {mixed}
+         */
+
+      }, {
+        key: "getValue",
+        value: function getValue(array, key) {
+          var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+          if (Type.isFunction(key)) return key(array, defaultValue);
+
+          if (Type.isArray(key)) {
+            var lastKey = key.pop();
+
+            var _iterator = _createForOfIteratorHelper(key),
+                _step;
+
+            try {
+              for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                var keyPart = _step.value;
+                array = this.getValue(array, keyPart);
+              }
+            } catch (err) {
+              _iterator.e(err);
+            } finally {
+              _iterator.f();
+            }
+
+            key = lastKey;
+          }
+
+          if ((Type.isArray(key) || Type.isObjectLike(key)) && this.keyExists(key, array)) return array[key];
+          var pos = Text.position(".", key);
+
+          if (pos !== false) {
+            array = this.getValue(array, Type.toString(key).substr(0, pos), defaultValue);
+            key = Type.toString(key).substr(pos + 1);
+            return this.getValue(array, key, defaultValue);
+          }
+
+          return this.keyExists(key, array) ? array[key] : defaultValue;
+        }
+        /**
+         * Удаляет значение массива или объекта по ключу
+         *
+         * @param {array|object} array
+         * @param {string|number} key
+         * @param {mixed} defaultValue
+         * @returns {mixed} Возвращает значение элемента массива или объекта, если оно удалилось, в противном случае значение по умолчанию
+         */
+
+      }, {
+        key: "remove",
+        value: function remove(array, key) {
+          var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+          if (Type.isArray(array) && this.keyExists(key, array)) {
+            var value = array[key];
+            array.splice(array.indexOf(key), 1);
+            return value;
+          }
+
+          if (Type.isObjectLike(array)) {
+            return this.removeFromObject(array, key, defaultValue);
+          }
+
+          return defaultValue;
+        }
+        /**
+         * Удаляет значение массива или объекта по ключу
+         *
+         * @param {object} object
+         * @param {string} key
+         * @param {mixed} defaultValue
+         * @returns {mixed} Возвращает значение элемента массива или объекта, если оно удалилось, в противном случае значение по умолчанию
+         */
+
+      }, {
+        key: "removeFromObject",
+        value: function removeFromObject(object, key) {
+          var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+          if (Type.isObjectLike(object) && this.keyExists(key, object)) {
+            var value = object[key];
+            delete object[key];
+            return value;
+          }
+
+          return defaultValue;
+        }
+        /**
+         * Удаляет значение массива или объекта по значению
+         *
+         * @param {array|object} array
+         * @param {string|number} value
+         * @param {mixed} defaultValue
+         * @returns {mixed}
+         */
+
+      }, {
+        key: "removeValue",
+        value: function removeValue(array, value) {
+          var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+          var result = defaultValue;
+
+          if (Type.isArray(array)) {
+            for (var key in array) {
+              if (array.hasOwnProperty(key)) {
+                var val = array[key];
+
+                if (val === value) {
+                  result = key;
+                  this.remove(array, key);
+                  break;
+                }
+              }
+            }
+          }
+
+          if (Type.isObjectLike(array)) {
+            return this.removeValueFromObject(array, value, defaultValue);
+          }
+
+          return result;
+        }
+        /**
+         * Удаляет значение объекта по значению
+         *
+         * @param {object} object
+         * @param {string|number} value
+         * @param {mixed} defaultValue
+         * @returns {mixed}
+         */
+
+      }, {
+        key: "removeValueFromObject",
+        value: function removeValueFromObject(object, value) {
+          var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+          var result = defaultValue;
+
+          if (Type.isObjectLike(object)) {
+            var keys = Object.keys(object);
+
+            for (var _i2 = 0, _keys2 = keys; _i2 < _keys2.length; _i2++) {
+              var key = _keys2[_i2];
+
+              if (object[key] === value) {
+                result = key;
+                this.remove(object, key);
+                break;
+              }
+            }
+          }
+
+          return result;
         }
       }]);
       return Arrays;
