@@ -25,7 +25,6 @@ const unescapeEntities = {
     '&#34;': '"',
 }
 
-
 export default class Text
 {
     /**
@@ -171,16 +170,104 @@ export default class Text
     }
 
     /**
+     * Заменяет текст внутри части строки.
+     *
+     * @param {string} string Входная строка.
+     * @param {string} replacement Строка замены.
+     * @param {number} start Позиция для начала замены подстроки at.
+     * Если start неотрицателен, то замена начнется с начального смещения в строку.
+     * Если start отрицательный, то замена начнется с начального символа в конце строки.
+     * @param {number|null} length Длина подстроки, подлежащей замене.
+     * Если задано и положительно, то оно представляет собой длину части строки, которая должна быть заменена.
+     * Если он отрицательный, то представляет собой количество символов от конца строки, на котором следует прекратить замену.
+     * Если он не задан, то по умолчанию он будет равен длине строки, то есть завершит замену в конце строки.
+     * Если длина равна нулю, то эта функция будет иметь эффект вставки замены в строку при заданном начальном смещении.
+     *
+     * @returns {string}
+     */
+    static replaceSubstring(string, replacement, start, length = null)
+    {
+        string = Type.toString(string)
+        let stringLength = string.length
+
+        if (start < 0)
+            start = Math.max(0, stringLength + start)
+        else if (start > stringLength)
+            start = stringLength
+
+        if (length !== null && length < 0)
+            length = Math.max(0, stringLength - start + length)
+        else if (length === null || length > stringLength)
+            length = stringLength
+
+        if ((start + length) > stringLength)
+            length = stringLength - start
+
+        return string.substr(0, start) + replacement + string.substr(start + length, stringLength - start - length)
+    }
+
+    /**
+     * Усекает строку от начала до указанного количества символов.
+     *
+     * @param {string} string Строка для обработки.
+     * @param {number} length Максимальная длина усеченной строки, включая маркер обрезки.
+     * @param {string} trimMarker Строка для добавления в начало.
+     * @returns {string}
+     */
+    static truncateBegin(string, length, trimMarker = "...")
+    {
+        string = Type.toString(string)
+        let stringLength = string.length
+        if (stringLength <= length)
+            return string
+
+        trimMarker = Type.toString(trimMarker)
+        let trimMarkerLength = trimMarker.length
+
+        return this.replaceSubstring(string, trimMarker, 0, -length + trimMarkerLength)
+    }
+
+    /**
      *
      * @param {string} string
      * @param {number} length
-     * @param {string} suffix
+     * @param {string} trimMarker
      * @returns {string}
      */
-    static truncate(string, length, suffix = "...")
+    static truncateMiddle(string, length, trimMarker = "...")
     {
         string = Type.toString(string)
-        return string.length > length ? this.trim(string.substr(0, length)) + suffix : string
+        let stringLength = string.length
+        if (stringLength <= length)
+            return string
+
+        trimMarker = Type.toString(trimMarker)
+        let trimMarkerLength = trimMarker.length
+
+        let start = Type.toInteger(Math.ceil((length - trimMarkerLength) / 2))
+        let end = length - start - trimMarkerLength
+
+        return this.replaceSubstring(string, trimMarker, start, -end)
+    }
+
+    /**
+     *
+     * @param {string} string
+     * @param {number} length
+     * @param {string} trimMarker
+     * @returns {string}
+     */
+    static truncateEnd(string, length, trimMarker = "...")
+    {
+        string = Type.toString(string)
+        let stringLength = string.length
+        if (stringLength <= length)
+            return string
+
+        trimMarker = Type.toString(trimMarker)
+        let trimMarkerLength = trimMarker.length
+
+        return this.trim(string.substr(0, length - trimMarkerLength)) + trimMarker
     }
 
     /**
