@@ -1068,17 +1068,57 @@
         key: "getValues",
 
         /**
-         * Возвращает значения массива с новыми ключами
+         * Возвращает значения массива или объекта с новыми ключами
          *
          * @param {array|object} array
+         * @param {boolean} clean
          * @returns {array}
          */
         value: function getValues(array) {
-          if (Type.isArray(array)) return this.clean(array);
-          return this.getValuesObject(array);
+          var clean = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+          if (Type.isArray(array)) return clean ? this.clean(array) : array;
+
+          if (Type.isObjectLike(array)) {
+            array = Object.values(array);
+            return clean ? this.clean(array) : array;
+          }
+
+          return [];
         }
         /**
-         * Возвращает массив ключей массива
+         * Возвращает первое значение массива или объекта
+         * @param {array|object} array
+         * @param {mixed} defaultValue
+         * @param {boolean} clean
+         * @returns {mixed}
+         */
+
+      }, {
+        key: "getFirstValue",
+        value: function getFirstValue(array) {
+          var defaultValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+          var clean = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+          var values = this.getValues(array, clean);
+          return values.length ? values[0] : defaultValue;
+        }
+        /**
+         * Возвращает последнее значение массива или объекта
+         * @param {array|object} array
+         * @param {mixed} defaultValue
+         * @param {boolean} clean
+         * @returns {mixed}
+         */
+
+      }, {
+        key: "getLastValue",
+        value: function getLastValue(array) {
+          var defaultValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+          var clean = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+          var values = this.getValues(array, clean);
+          return values.length ? values[values.length - 1] : defaultValue;
+        }
+        /**
+         * Возвращает массив ключей массива или объекта
          *
          * @param {array|object} array
          * @param {boolean} convertString
@@ -1089,36 +1129,45 @@
         key: "getKeys",
         value: function getKeys(array) {
           var convertString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-          if (Type.isArray(array)) return this.clean(array.map(function (v, i) {
+          if (Type.isArray(array)) return array.map(function (v, i) {
             return convertString ? i.toString() : i;
-          }));
-          return this.getKeysObject(array);
-        }
-        /**
-         * Возвращает массив значений объекта
-         *
-         * @param {object} object
-         * @returns {array}
-         */
-
-      }, {
-        key: "getValuesObject",
-        value: function getValuesObject(object) {
-          if (Type.isObjectLike(object)) return this.clean(Object.values(object));
+          });
+          if (Type.isObjectLike(array)) return Object.keys(array);
           return [];
         }
         /**
-         * Возвращает массив ключей объекта
+         * Возвращает первый ключ массива или объекта
          *
-         * @param {object} object
-         * @returns {array}
+         * @param {array|object} array
+         * @param {mixed} defaultValue
+         * @param {boolean} convertString
+         * @returns {mixed}
          */
 
       }, {
-        key: "getKeysObject",
-        value: function getKeysObject(object) {
-          if (Type.isObjectLike(object)) return this.clean(Object.keys(object));
-          return [];
+        key: "getFirstKey",
+        value: function getFirstKey(array) {
+          var defaultValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+          var convertString = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+          var keys = this.getKeys(array, convertString);
+          return keys.length ? keys[0] : defaultValue;
+        }
+        /**
+         * Возвращает последний ключ массива или объекта
+         *
+         * @param {array|object} array
+         * @param {mixed} defaultValue
+         * @param {boolean} convertString
+         * @returns {mixed}
+         */
+
+      }, {
+        key: "getLastKey",
+        value: function getLastKey(array) {
+          var defaultValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+          var convertString = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+          var keys = this.getKeys(array, convertString);
+          return keys.length ? keys[keys.length - 1] : defaultValue;
         }
         /**
          * Очищает значения массива от null или undefined
@@ -1146,15 +1195,14 @@
       }, {
         key: "keyExists",
         value: function keyExists(key, array) {
-          if (Type.isArray(array)) return array.hasOwnProperty(key);
-          if (Type.isObjectLike(array)) return key in array;
+          if (Type.isArray(array) || Type.isObjectLike(array)) return array.hasOwnProperty(key);
           return false;
         }
         /**
          * Проверяет, присутствует ли в массиве или объекте значение
          *
-         * @param value
-         * @param array
+         * @param {mixed} value
+         * @param {array|object} array
          * @returns {boolean}
          */
 
@@ -1273,35 +1321,10 @@
         value: function remove(array, key) {
           var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
-          if (Type.isArray(array) && this.keyExists(key, array)) {
+          if (this.keyExists(key, array)) {
             var value = array[key];
-            array.splice(array.indexOf(key), 1);
-            return value;
-          }
-
-          if (Type.isObjectLike(array)) {
-            return this.removeFromObject(array, key, defaultValue);
-          }
-
-          return defaultValue;
-        }
-        /**
-         * Удаляет значение массива или объекта по ключу
-         *
-         * @param {object} object
-         * @param {string} key
-         * @param {mixed} defaultValue
-         * @returns {mixed} Возвращает значение элемента массива или объекта, если оно удалилось, в противном случае значение по умолчанию
-         */
-
-      }, {
-        key: "removeFromObject",
-        value: function removeFromObject(object, key) {
-          var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-          if (Type.isObjectLike(object) && this.keyExists(key, object)) {
-            var value = object[key];
-            delete object[key];
+            if (Type.isArray(array)) array.splice(array.indexOf(key), 1);
+            if (Type.isObjectLike(array)) delete array[key];
             return value;
           }
 
@@ -1334,44 +1357,92 @@
                 }
               }
             }
-          }
-
-          if (Type.isObjectLike(array)) {
-            return this.removeValueFromObject(array, value, defaultValue);
-          }
-
-          return result;
-        }
-        /**
-         * Удаляет значение объекта по значению
-         *
-         * @param {object} object
-         * @param {string|number} value
-         * @param {mixed} defaultValue
-         * @returns {mixed}
-         */
-
-      }, {
-        key: "removeValueFromObject",
-        value: function removeValueFromObject(object, value) {
-          var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-          var result = defaultValue;
-
-          if (Type.isObjectLike(object)) {
-            var keys = Object.keys(object);
+          } else if (Type.isObjectLike(array)) {
+            var keys = Object.keys(array);
 
             for (var _i2 = 0, _keys2 = keys; _i2 < _keys2.length; _i2++) {
-              var key = _keys2[_i2];
+              var _key = _keys2[_i2];
 
-              if (object[key] === value) {
-                result = key;
-                this.remove(object, key);
+              if (array[_key] === value) {
+                result = _key;
+                this.remove(array, _key);
                 break;
               }
             }
           }
 
           return result;
+        }
+        /**
+         * Возвращает значения указанного столбца в массиве.
+         * Входной массив должен быть многомерным или массивом объектов.
+         *
+         * Например,
+         * let array = [
+         *      {id: '123', data: 'abc'}
+         *      {id: '345', data: 'def'}
+         * ];
+         *
+         * let result = Arrays.getColumn(array, 'id');
+         * // в результате получается: ['123', '345']
+         *
+         * // использование анонимной функции
+         * let result = Arrays.getColumn(array, function(element), {
+         *    return element.id;
+         * });
+         *
+         * @param {array|object} array
+         * @param {number|string|function} name
+         * @param {boolean} keepKeys
+         * @returns {array|object} список значений столбцов
+         */
+
+      }, {
+        key: "getColumn",
+        value: function getColumn(array, name) {
+          var keepKeys = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+          var result = [];
+          var resultObject = {};
+
+          if (Type.isObjectLike(array)) {
+            var keys = this.getKeys(array);
+
+            var _iterator2 = _createForOfIteratorHelper(keys),
+                _step2;
+
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                var key = _step2.value;
+                var value = array[key];
+
+                if (keepKeys) {
+                  resultObject[key] = this.getValue(value, name);
+                } else {
+                  result.push(this.getValue(value, name));
+                }
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
+          } else if (Type.isArray(array)) {
+            var _iterator3 = _createForOfIteratorHelper(array),
+                _step3;
+
+            try {
+              for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+                var _value = _step3.value;
+                result.push(this.getValue(_value, name));
+              }
+            } catch (err) {
+              _iterator3.e(err);
+            } finally {
+              _iterator3.f();
+            }
+          }
+
+          return keepKeys ? resultObject : result;
         }
       }]);
       return Arrays;
