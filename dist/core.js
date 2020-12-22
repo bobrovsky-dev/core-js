@@ -1068,10 +1068,10 @@
         key: "getValues",
 
         /**
-         * Возвращает значения массива или объекта с новыми ключами
+         * Возвращает значения с новыми ключами
          *
-         * @param {array|object} array
-         * @param {boolean} clean
+         * @param {array|object} array Массив или объект
+         * @param {boolean} clean Нужно ли очищать от null и undefined
          * @returns {array}
          */
         value: function getValues(array) {
@@ -1086,10 +1086,11 @@
           return [];
         }
         /**
-         * Возвращает первое значение массива или объекта
-         * @param {array|object} array
-         * @param {mixed} defaultValue
-         * @param {boolean} clean
+         * Возвращает первое значение, или значение по умолчанию
+         *
+         * @param {array|object} array Массив или объект
+         * @param {mixed} defaultValue Значение по умолчанию
+         * @param {boolean} clean Нужно ли очищать от null и undefined
          * @returns {mixed}
          */
 
@@ -1102,10 +1103,11 @@
           return values.length ? values[0] : defaultValue;
         }
         /**
-         * Возвращает последнее значение массива или объекта
-         * @param {array|object} array
-         * @param {mixed} defaultValue
-         * @param {boolean} clean
+         * Возвращает последнее значение, или значение по умолчанию
+         *
+         * @param {array|object} array Массив или объект
+         * @param {mixed} defaultValue Значение по умолчанию
+         * @param {boolean} clean Нужно ли очищать от null и undefined
          * @returns {mixed}
          */
 
@@ -1118,29 +1120,29 @@
           return values.length ? values[values.length - 1] : defaultValue;
         }
         /**
-         * Возвращает массив ключей массива или объекта
+         * Возвращает массив ключей
          *
-         * @param {array|object} array
-         * @param {boolean} convertString
+         * @param {array|object} array Массив или объект
+         * @param {boolean} convertKeyToString Конвертировать ключи массива в строку
          * @returns {array}
          */
 
       }, {
         key: "getKeys",
         value: function getKeys(array) {
-          var convertString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+          var convertKeyToString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
           if (Type.isArray(array)) return array.map(function (v, i) {
-            return convertString ? i.toString() : i;
+            return convertKeyToString ? i.toString() : i;
           });
           if (Type.isObjectLike(array)) return Object.keys(array);
           return [];
         }
         /**
-         * Возвращает первый ключ массива или объекта
+         * Возвращает первый ключ, или значение по умолчанию
          *
-         * @param {array|object} array
-         * @param {mixed} defaultValue
-         * @param {boolean} convertString
+         * @param {array|object} array Массив или объект
+         * @param {mixed} defaultValue Значение по умолчанию
+         * @param {boolean} convertString Конвертировать ключи массива в строку
          * @returns {mixed}
          */
 
@@ -1153,11 +1155,11 @@
           return keys.length ? keys[0] : defaultValue;
         }
         /**
-         * Возвращает последний ключ массива или объекта
+         * Возвращает последний ключ, или значение по умолчанию
          *
-         * @param {array|object} array
-         * @param {mixed} defaultValue
-         * @param {boolean} convertString
+         * @param {array|object} array Массив или объект
+         * @param {mixed} defaultValue Значение по умолчанию
+         * @param {boolean} convertString Конвертировать ключи массива в строку
          * @returns {mixed}
          */
 
@@ -1172,8 +1174,8 @@
         /**
          * Очищает значения массива от null или undefined
          *
-         * @param {array} array
-         * @returns {array}
+         * @param {array} array Массив
+         * @returns {array} Очищенный массив
          */
 
       }, {
@@ -1187,8 +1189,8 @@
         /**
          * Проверяет, присутствует ли в массиве или объекте указанный ключ
          *
-         * @param {string|number} key
-         * @param {array|object} array
+         * @param {string|number} key Ключ
+         * @param {array|object} array Массив или объект
          * @returns {boolean}
          */
 
@@ -1201,8 +1203,8 @@
         /**
          * Проверяет, присутствует ли в массиве или объекте значение
          *
-         * @param {mixed} value
-         * @param {array|object} array
+         * @param {mixed} value Значение
+         * @param {array|object} array Массив или объект
          * @returns {boolean}
          */
 
@@ -1226,11 +1228,11 @@
           return false;
         }
         /**
-         *  Возращает значение элемента, если оно найдено, в противном случае значение по умолчанию
+         *  Возращает значение элемента, если оно найдено, или значение по умолчанию
          *
-         * @param {array} array
-         * @param {string|number} key
-         * @param {mixed} defaultValue
+         * @param {array|object} array Массив или объект
+         * @param {string|number} key Ключ
+         * @param {mixed} defaultValue Значение по умолчанию
          * @returns {mixed}
          */
 
@@ -1240,33 +1242,69 @@
           return this.keyExists(key, array) ? array[key] : defaultValue;
         }
         /**
-         * Извлекает значение элемента массива или объекта с заданным ключом или именем свойства.
-         * Если ключ не существует в массиве или объекте, вместо него будет возвращено значение по умолчанию.
+         * Извлекает значение элемента массива или объекта с заданным ключом
+         * Если ключ не существует в массиве или объекте, вместо него будет возвращено значение по умолчанию
          *
          * Ниже приведены некоторые примеры использования,
          *
-         * работа с массивом
-         * B.Arrays.getValue(array, 1)
+         * работа с массивом:
+         * let array = [
+         *      "первое значение",
+         *      "второе значение",
+         * ]
          *
-         * работа с объектом
-         * B.Arrays.getValue(object, 'one')
+         * Arrays.getValue(array, 1)
+         * вернет "второе значение"
          *
-         * работа с функцией
-         * B.Arrays.getValue(user, function(user, default, value) {
+         *
+         * работа с объектом:
+         * let object = {
+         *     one: "1",
+         *     two: "2"
+         * }
+         *
+         * Arrays.getValue(object, 'one')
+         * вернет "1"
+         *
+         *
+         *
+         * работа с функцией:
+         * let user = {
+         *     firstName: "Имя",
+         *     lastName: "Фамилия"
+         * }
+         *
+         * B.Arrays.getValue(user, function(user, defaultValue) {
          *     return user.firstName + ' ' + user.lastName
          * })
+         * вернет "Имя Фамилия"
          *
          * использование точечного формата для получения значения встроенного объекта или массива
          *
-         * B.Arrays.getValue(array, '1.2')
-         * B.Arrays.getValue(array, [1, 2])
-         * B.Arrays.getValue(object, 'one.two')
-         * B.Arrays.getValue(object, ['one', 'two'])
+         * let array = [
+         *      ["Яблоко", "Груша", "Слива"],
+         *      ["Апельсин", "Мандарин"],
+         * ]
+         *
+         * Arrays.getValue(array, '0.2') или Arrays.getValue(array, [0, 2])
+         * вернет "Слива"
+         *
+         * let object = {
+         *      one: {
+         *          two: {
+         *              three: "Значение three"
+         *          }
+         *      }
+         * }
          *
          *
-         * @param {array|object} array
-         * @param {string|number|function|array} key
-         * @param {mixed} defaultValue
+         * Arrays.getValue(object, 'one.two.three') или Arrays.getValue(object, ['one', 'two', 'three'])
+         * вернет "Значение three"
+         *
+         *
+         * @param {array|object} array Массив или объект
+         * @param {string|number|function|array} key Ключ
+         * @param {mixed} defaultValue Значение по умолчанию
          * @returns {mixed}
          */
 
@@ -1310,9 +1348,9 @@
         /**
          * Удаляет значение массива или объекта по ключу
          *
-         * @param {array|object} array
-         * @param {string|number} key
-         * @param {mixed} defaultValue
+         * @param {array|object} array Массив или объект
+         * @param {string|number} key Ключ
+         * @param {mixed} defaultValue Значение по умолчанию
          * @returns {mixed} Возвращает значение элемента массива или объекта, если оно удалилось, в противном случае значение по умолчанию
          */
 
@@ -1331,11 +1369,11 @@
           return defaultValue;
         }
         /**
-         * Удаляет значение массива или объекта по значению
+         * Удаляет значения массива или объекта по переданному значению
          *
-         * @param {array|object} array
-         * @param {string|number} value
-         * @param {mixed} defaultValue
+         * @param {array|object} array Массив или объект
+         * @param {string|number} value Ключ
+         * @param {mixed} defaultValue Значение по умолчанию
          * @returns {mixed}
          */
 
@@ -1353,7 +1391,6 @@
                 if (val === value) {
                   result = key;
                   this.remove(array, key);
-                  break;
                 }
               }
             }
@@ -1366,7 +1403,6 @@
               if (array[_key] === value) {
                 result = _key;
                 this.remove(array, _key);
-                break;
               }
             }
           }
@@ -1384,17 +1420,17 @@
          * ];
          *
          * let result = Arrays.getColumn(array, 'id');
-         * // в результате получается: ['123', '345']
+         * в результате получается: ['123', '345']
          *
-         * // использование анонимной функции
+         * использование анонимной функции
          * let result = Arrays.getColumn(array, function(element), {
          *    return element.id;
          * });
          *
-         * @param {array|object} array
-         * @param {number|string|function} name
-         * @param {boolean} keepKeys
-         * @returns {array|object} список значений столбцов
+         * @param {array|object} array Массив или объект
+         * @param {number|string|function} name Название ключа столбца
+         * @param {boolean} keepKeys Если false, то результирующий массив будет переиндексирован целыми числами.
+         * @returns {array|object} Список значений столбцов
          */
 
       }, {
