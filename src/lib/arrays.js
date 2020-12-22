@@ -4,21 +4,54 @@ import Text from "./text";
 export default class Arrays
 {
     /**
-     * Возвращает значения массива с новыми ключами
+     * Возвращает значения массива или объекта с новыми ключами
      *
      * @param {array|object} array
+     * @param {boolean} clean
      * @returns {array}
      */
-    static getValues(array)
+    static getValues(array, clean = true)
     {
         if (Type.isArray(array))
-            return this.clean(array)
+            return clean ? this.clean(array) : array
 
-        return this.getValuesObject(array)
+        if(Type.isObjectLike(array))
+        {
+            array = Object.values(array)
+            return clean ? this.clean(array) : array
+        }
+
+        return []
     }
 
     /**
-     * Возвращает массив ключей массива
+     * Возвращает первое значение массива или объекта
+     * @param {array|object} array
+     * @param {mixed} defaultValue
+     * @param {boolean} clean
+     * @returns {mixed}
+     */
+    static getFirstValue(array, defaultValue = null, clean = true)
+    {
+        let values = this.getValues(array, clean)
+        return values.length ? values[0] : defaultValue
+    }
+
+    /**
+     * Возвращает последнее значение массива или объекта
+     * @param {array|object} array
+     * @param {mixed} defaultValue
+     * @param {boolean} clean
+     * @returns {mixed}
+     */
+    static getLastValue(array, defaultValue = null, clean = true)
+    {
+        let values = this.getValues(array, clean)
+        return values.length ? values[values.length - 1] : defaultValue
+    }
+
+    /**
+     * Возвращает массив ключей массива или объекта
      *
      * @param {array|object} array
      * @param {boolean} convertString
@@ -27,37 +60,40 @@ export default class Arrays
     static getKeys(array, convertString = false)
     {
         if (Type.isArray(array))
-            return this.clean(array.map((v, i) => convertString ? i.toString() : i))
+            return array.map((v, i) => convertString ? i.toString() : i)
 
-        return this.getKeysObject(array)
-    }
-
-    /**
-     * Возвращает массив значений объекта
-     *
-     * @param {object} object
-     * @returns {array}
-     */
-    static getValuesObject(object)
-    {
-        if(Type.isObjectLike(object))
-            return this.clean(Object.values(object))
+        if(Type.isObjectLike(array))
+            return Object.keys(array)
 
         return []
     }
 
     /**
-     * Возвращает массив ключей объекта
+     * Возвращает первый ключ массива или объекта
      *
-     * @param {object} object
-     * @returns {array}
+     * @param {array|object} array
+     * @param {mixed} defaultValue
+     * @param {boolean} convertString
+     * @returns {mixed}
      */
-    static getKeysObject(object)
+    static getFirstKey(array, defaultValue = null, convertString = false)
     {
-        if(Type.isObjectLike(object))
-            return this.clean(Object.keys(object))
+        let keys = this.getKeys(array, convertString)
+        return keys.length ? keys[0] : defaultValue
+    }
 
-        return []
+    /**
+     * Возвращает последний ключ массива или объекта
+     *
+     * @param {array|object} array
+     * @param {mixed} defaultValue
+     * @param {boolean} convertString
+     * @returns {mixed}
+     */
+    static getLastKey(array, defaultValue = null, convertString = false)
+    {
+        let keys = this.getKeys(array, convertString)
+        return keys.length ? keys[keys.length - 1] : defaultValue
     }
 
     /**
@@ -83,11 +119,8 @@ export default class Arrays
      */
     static keyExists(key, array)
     {
-        if (Type.isArray(array))
+        if (Type.isArray(array) || Type.isObjectLike(array))
             return array.hasOwnProperty(key)
-
-        if (Type.isObjectLike(array))
-            return key in array
 
         return false
     }
@@ -95,8 +128,8 @@ export default class Arrays
     /**
      * Проверяет, присутствует ли в массиве или объекте значение
      *
-     * @param value
-     * @param array
+     * @param {mixed} value
+     * @param {array|object} array
      * @returns {boolean}
      */
     static isIn(value, array)
@@ -205,37 +238,18 @@ export default class Arrays
      */
     static remove(array, key, defaultValue = null)
     {
-        if (Type.isArray(array) && this.keyExists(key, array))
+        if (this.keyExists(key, array))
         {
             let value = array[key]
-            array.splice(array.indexOf(key), 1)
+            if (Type.isArray(array))
+                array.splice(array.indexOf(key), 1)
+
+            if (Type.isObjectLike(array))
+                delete array[key]
+
             return value
         }
 
-        if (Type.isObjectLike(array))
-        {
-            return this.removeFromObject(array, key, defaultValue)
-        }
-
-        return defaultValue
-    }
-
-    /**
-     * Удаляет значение массива или объекта по ключу
-     *
-     * @param {object} object
-     * @param {string} key
-     * @param {mixed} defaultValue
-     * @returns {mixed} Возвращает значение элемента массива или объекта, если оно удалилось, в противном случае значение по умолчанию
-     */
-    static removeFromObject(object, key, defaultValue = null)
-    {
-        if (Type.isObjectLike(object) && this.keyExists(key, object))
-        {
-            let value = object[key]
-            delete object[key]
-            return value
-        }
         return defaultValue
     }
 
@@ -267,36 +281,15 @@ export default class Arrays
                 }
             }
         }
-
-        if (Type.isObjectLike(array))
+        else if (Type.isObjectLike(array))
         {
-            return this.removeValueFromObject(array, value, defaultValue)
-        }
-
-        return result
-    }
-
-    /**
-     * Удаляет значение объекта по значению
-     *
-     * @param {object} object
-     * @param {string|number} value
-     * @param {mixed} defaultValue
-     * @returns {mixed}
-     */
-    static removeValueFromObject(object, value, defaultValue = null)
-    {
-        let result = defaultValue
-
-        if (Type.isObjectLike(object))
-        {
-            let keys = Object.keys(object)
+            let keys = Object.keys(array)
             for (let key of keys)
             {
-                if (object[key] === value)
+                if (array[key] === value)
                 {
                     result = key
-                    this.remove(object, key)
+                    this.remove(array, key)
                     break
                 }
             }
@@ -305,4 +298,59 @@ export default class Arrays
         return result
     }
 
+    /**
+     * Возвращает значения указанного столбца в массиве.
+     * Входной массив должен быть многомерным или массивом объектов.
+     *
+     * Например,
+     * let array = [
+     *      {id: '123', data: 'abc'}
+     *      {id: '345', data: 'def'}
+     * ];
+     *
+     * let result = Arrays.getColumn(array, 'id');
+     * // в результате получается: ['123', '345']
+     *
+     * // использование анонимной функции
+     * let result = Arrays.getColumn(array, function(element), {
+     *    return element.id;
+     * });
+     *
+     * @param {array|object} array
+     * @param {number|string|function} name
+     * @param {boolean} keepKeys
+     * @returns {array|object} список значений столбцов
+     */
+    static getColumn(array, name, keepKeys = true)
+    {
+        let result = []
+        let resultObject = {}
+
+        if (Type.isObjectLike(array))
+        {
+            let keys = this.getKeys(array);
+
+            for (let key of keys)
+            {
+                let value = array[key]
+                if (keepKeys)
+                {
+                    resultObject[key] = this.getValue(value, name)
+                }
+                else
+                {
+                    result.push(this.getValue(value, name))
+                }
+            }
+        }
+        else if (Type.isArray(array))
+        {
+            for (let value of array)
+            {
+                result.push(this.getValue(value, name))
+            }
+        }
+
+        return keepKeys ? resultObject : result
+    }
 }
