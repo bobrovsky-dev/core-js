@@ -584,473 +584,87 @@
       return Browser;
     }();
 
-    var reEscape = /[&<>'"]/g;
-    var reUnescape = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
-    var escapeEntities = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    };
-    var unescapeEntities = {
-      '&amp;': '&',
-      '&#38;': '&',
-      '&lt;': '<',
-      '&#60;': '<',
-      '&gt;': '>',
-      '&#62;': '>',
-      '&apos;': "'",
-      '&#39;': "'",
-      '&quot;': '"',
-      '&#34;': '"'
-    };
+    var rsAstralRange = "\\ud800-\\udfff";
+    var rsComboMarksRange = "\\u0300-\\u036f";
+    var reComboHalfMarksRange = "\\ufe20-\\ufe2f";
+    var rsComboSymbolsRange = "\\u20d0-\\u20ff";
+    var rsComboMarksExtendedRange = "\\u1ab0-\\u1aff";
+    var rsComboMarksSupplementRange = "\\u1dc0-\\u1dff";
+    var rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange + rsComboMarksExtendedRange + rsComboMarksSupplementRange;
+    var rsVarRange = "\\ufe0e\\ufe0f";
+    var rsAstral = "[".concat(rsAstralRange, "]");
+    var rsCombo = "[".concat(rsComboRange, "]");
+    var rsFitz = "\\ud83c[\\udffb-\\udfff]";
+    var rsModifier = "(?:".concat(rsCombo, "|").concat(rsFitz, ")");
+    var rsNonAstral = "[^".concat(rsAstralRange, "]");
+    var rsRegional = "(?:\\ud83c[\\udde6-\\uddff]){2}";
+    var rsSurrPair = "[\\ud800-\\udbff][\\udc00-\\udfff]";
+    var rsZWJ = "\\u200d";
+    var reOptMod = "".concat(rsModifier, "?");
+    var rsOptVar = "[".concat(rsVarRange, "]?");
+    var rsOptJoin = "(?:".concat(rsZWJ, "(?:").concat([rsNonAstral, rsRegional, rsSurrPair].join('|'), ")").concat(rsOptVar + reOptMod, ")*");
+    var rsSeq = rsOptVar + reOptMod + rsOptJoin;
+    var rsNonAstralCombo = "".concat(rsNonAstral).concat(rsCombo, "?");
+    var rsSymbol = "(?:".concat([rsNonAstralCombo, rsCombo, rsRegional, rsSurrPair, rsAstral].join('|'), ")");
+    var reUnicode = RegExp("".concat(rsFitz, "(?=").concat(rsFitz, ")|").concat(rsSymbol + rsSeq), 'g');
+    var reHasUnicode = RegExp("[".concat(rsZWJ + rsAstralRange + rsComboRange + rsVarRange, "]"));
+    var rsDingbatRange = "\\u2700-\\u27bf";
+    var rsLowerRange = 'a-z\\xdf-\\xf6\\xf8-\\xff';
+    var rsMathOpRange = '\\xac\\xb1\\xd7\\xf7';
+    var rsNonCharRange = '\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf';
+    var rsPunctuationRange = "\\u2000-\\u206f";
+    var rsSpaceRange = " \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000";
+    var rsUpperRange = 'A-Z\\xc0-\\xd6\\xd8-\\xde';
+    var rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
+    var rsApos = "['\u2019]";
+    var rsBreak = "[".concat(rsBreakRange, "]");
+    var rsDigit = '\\d';
+    var rsDingbat = "[".concat(rsDingbatRange, "]");
+    var rsLower = "[".concat(rsLowerRange, "]");
+    var rsMisc = "[^".concat(rsAstralRange).concat(rsBreakRange + rsDigit + rsDingbatRange + rsLowerRange + rsUpperRange, "]");
+    var rsUpper = "[".concat(rsUpperRange, "]");
+    var rsMiscLower = "(?:".concat(rsLower, "|").concat(rsMisc, ")");
+    var rsMiscUpper = "(?:".concat(rsUpper, "|").concat(rsMisc, ")");
+    var rsOptContrLower = "(?:".concat(rsApos, "(?:d|ll|m|re|s|t|ve))?");
+    var rsOptContrUpper = "(?:".concat(rsApos, "(?:D|LL|M|RE|S|T|VE))?");
+    var rsOrdLower = '\\d*(?:1st|2nd|3rd|(?![123])\\dth)(?=\\b|[A-Z_])';
+    var rsOrdUpper = '\\d*(?:1ST|2ND|3RD|(?![123])\\dTH)(?=\\b|[a-z_])';
+    var rsEmoji = "(?:".concat([rsDingbat, rsRegional, rsSurrPair].join('|'), ")").concat(rsSeq);
+    var reUnicodeWords = RegExp(["".concat(rsUpper, "?").concat(rsLower, "+").concat(rsOptContrLower, "(?=").concat([rsBreak, rsUpper, '$'].join('|'), ")"), "".concat(rsMiscUpper, "+").concat(rsOptContrUpper, "(?=").concat([rsBreak, rsUpper + rsMiscLower, '$'].join('|'), ")"), "".concat(rsUpper, "?").concat(rsMiscLower, "+").concat(rsOptContrLower), "".concat(rsUpper, "+").concat(rsOptContrUpper), rsOrdUpper, rsOrdLower, "".concat(rsDigit, "+"), rsEmoji].join('|'), 'g');
 
-    var Text = /*#__PURE__*/function () {
-      function Text() {
-        babelHelpers.classCallCheck(this, Text);
+    var Unicode = /*#__PURE__*/function () {
+      function Unicode() {
+        babelHelpers.classCallCheck(this, Unicode);
       }
 
-      babelHelpers.createClass(Text, null, [{
-        key: "encode",
-
-        /**
-         *
-         * @param {string} value
-         * @returns {string}
-         */
-        value: function encode(value) {
-          if (Type.isString(value)) {
-            return value.replace(reEscape, function (item) {
-              return escapeEntities[item];
-            });
-          }
-
-          return value;
+      babelHelpers.createClass(Unicode, null, [{
+        key: "has",
+        value: function has(string) {
+          return reHasUnicode.test(string);
         }
-        /**
-         *
-         * @param {string} value
-         * @returns {string}
-         */
-
       }, {
-        key: "decode",
-        value: function decode(value) {
-          if (Type.isString(value)) {
-            return value.replace(reUnescape, function (item) {
-              return unescapeEntities[item];
-            });
-          }
-
-          return value;
+        key: "toArray",
+        value: function toArray(string) {
+          return string.match(reUnicode) || [];
         }
-        /**
-         *
-         * @param {number} length
-         * @returns {string}
-         */
-
       }, {
-        key: "getRandom",
-        value: function getRandom() {
-          var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
-          return babelHelpers.toConsumableArray(Array(length)).map(function () {
-            return (~~(Math.random() * 36)).toString(36);
-          }).join('');
-        }
-        /**
-         *
-         * @param {string} str
-         * @returns {string}
-         */
+        key: "size",
+        value: function size(string) {
+          var result = reUnicode.lastIndex = 0;
 
-      }, {
-        key: "toCamelCase",
-        value: function toCamelCase(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          var regex = /[-_\s]+(.)?/g;
-
-          if (!regex.test(str)) {
-            return str.match(/^[A-Z]+$/) ? str.toLowerCase() : str[0].toLowerCase() + str.slice(1);
-          }
-
-          str = str.toLowerCase();
-          str = str.replace(regex, function (match, letter) {
-            return letter ? letter.toUpperCase() : '';
-          });
-          return str[0].toLowerCase() + str.substr(1);
-        }
-        /**
-         *
-         * @param {string} str
-         * @returns {string}
-         */
-
-      }, {
-        key: "toPascalCase",
-        value: function toPascalCase(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          return this.capitalize(this.toCamelCase(str));
-        }
-        /**
-         *
-         * @param {string} str
-         * @returns {string}
-         */
-
-      }, {
-        key: "toKebabCase",
-        value: function toKebabCase(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          var matches = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
-
-          if (!matches) {
-            return str;
-          }
-
-          return matches.map(function (x) {
-            return x.toLowerCase();
-          }).join('-');
-        }
-        /**
-         *
-         * @param {string} str
-         * @returns {string}
-         */
-
-      }, {
-        key: "capitalize",
-        value: function capitalize(str) {
-          if (Type.isEmpty(str)) {
-            return str;
-          }
-
-          return str[0].toUpperCase() + str.substr(1);
-        }
-        /**
-         *
-         * @param {string} symbol
-         * @param {string} string
-         * @returns {boolean}
-         */
-
-      }, {
-        key: "isIn",
-        value: function isIn(symbol, string) {
-          string = Type.toString(string);
-          return string.indexOf(Type.toString(symbol)) !== -1;
-        }
-        /**
-         *
-         * @param {string} value
-         * @returns {string}
-         */
-
-      }, {
-        key: "trim",
-        value: function trim(value) {
-          if (Type.isString(value)) return value.trim();
-          return value;
-        }
-        /**
-         * Заменяет текст внутри части строки.
-         *
-         * @param {string} string Входная строка.
-         * @param {string} replacement Строка замены.
-         * @param {number} start Позиция для начала замены подстроки at.
-         * Если start неотрицателен, то замена начнется с начального смещения в строку.
-         * Если start отрицательный, то замена начнется с начального символа в конце строки.
-         * @param {number|null} length Длина подстроки, подлежащей замене.
-         * Если задано и положительно, то оно представляет собой длину части строки, которая должна быть заменена.
-         * Если он отрицательный, то представляет собой количество символов от конца строки, на котором следует прекратить замену.
-         * Если он не задан, то по умолчанию он будет равен длине строки, то есть завершит замену в конце строки.
-         * Если длина равна нулю, то эта функция будет иметь эффект вставки замены в строку при заданном начальном смещении.
-         *
-         * @returns {string}
-         */
-
-      }, {
-        key: "replaceSubstring",
-        value: function replaceSubstring(string, replacement, start) {
-          var length = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-          string = Type.toString(string);
-          var stringLength = string.length;
-          if (start < 0) start = Math.max(0, stringLength + start);else if (start > stringLength) start = stringLength;
-          if (length !== null && length < 0) length = Math.max(0, stringLength - start + length);else if (length === null || length > stringLength) length = stringLength;
-          if (start + length > stringLength) length = stringLength - start;
-          return string.substr(0, start) + replacement + string.substr(start + length, stringLength - start - length);
-        }
-        /**
-         * Усекает строку от начала до указанного количества символов.
-         *
-         * @param {string} string Строка для обработки.
-         * @param {number} length Максимальная длина усеченной строки, включая маркер обрезки.
-         * @param {string} trimMarker Строка для добавления в начало.
-         * @returns {string}
-         */
-
-      }, {
-        key: "truncateBegin",
-        value: function truncateBegin(string, length) {
-          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
-          string = Type.toString(string);
-          var stringLength = string.length;
-          if (stringLength <= length) return string;
-          trimMarker = Type.toString(trimMarker);
-          var trimMarkerLength = trimMarker.length;
-          return this.replaceSubstring(string, trimMarker, 0, -length + trimMarkerLength);
-        }
-        /**
-         *
-         * @param {string} string
-         * @param {number} length
-         * @param {string} trimMarker
-         * @returns {string}
-         */
-
-      }, {
-        key: "truncateMiddle",
-        value: function truncateMiddle(string, length) {
-          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
-          string = Type.toString(string);
-          var stringLength = string.length;
-          if (stringLength <= length) return string;
-          trimMarker = Type.toString(trimMarker);
-          var trimMarkerLength = trimMarker.length;
-          var start = Type.toInteger(Math.ceil((length - trimMarkerLength) / 2));
-          var end = length - start - trimMarkerLength;
-          return this.replaceSubstring(string, trimMarker, start, -end);
-        }
-        /**
-         *
-         * @param {string} string
-         * @param {number} length
-         * @param {string} trimMarker
-         * @returns {string}
-         */
-
-      }, {
-        key: "truncateEnd",
-        value: function truncateEnd(string, length) {
-          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
-          string = Type.toString(string);
-          var stringLength = string.length;
-          if (stringLength <= length) return string;
-          trimMarker = Type.toString(trimMarker);
-          var trimMarkerLength = trimMarker.length;
-          return this.trim(string.substr(0, length - trimMarkerLength)) + trimMarker;
-        }
-        /**
-         *
-         * @param {string} string
-         * @param {object} rules
-         * @param {string} tagStart
-         * @param {string} tagEnd
-         * @returns {string}
-         */
-
-      }, {
-        key: "replaceMacros",
-        value: function replaceMacros(string, rules) {
-          var tagStart = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "#";
-          var tagEnd = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "#";
-
-          if (Type.isObjectLike(rules)) {
-            var macros = {};
-            Object.keys(rules).forEach(function (key) {
-              macros[tagStart + key + tagEnd] = rules[key];
-            });
-            string = Text.replace(string, macros);
-          }
-
-          return string;
-        }
-        /**
-         *
-         * @param {string} string
-         * @param {object} rules
-         * @param {string} flag
-         * @returns {string}
-         */
-
-      }, {
-        key: "replace",
-        value: function replace(string, rules) {
-          var flag = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'g';
-          string = Type.toString(string);
-
-          if (Type.isObjectLike(rules)) {
-            Object.keys(rules).forEach(function (key) {
-              string = string.replace(new RegExp(key, flag), rules[key]);
-            });
-          }
-
-          return string;
-        }
-        /**
-         *
-         * @param {string} value
-         * @returns {string}
-         */
-
-      }, {
-        key: "nl2br",
-        value: function nl2br(value) {
-          if (!value || !value.replace) return value;
-          return value.replace(/([^>])\n/g, '$1<br/>');
-        }
-        /**
-         *
-         * @param {string} value
-         * @returns {string}
-         */
-
-      }, {
-        key: "stripTags",
-        value: function stripTags(value) {
-          if (!value || !value.split) return value;
-          return value.split(/<[^>]+>/g).join('');
-        }
-        /**
-         *
-         * @param {string} value
-         * @returns {string}
-         */
-
-      }, {
-        key: "stripPhpTags",
-        value: function stripPhpTags(value) {
-          if (!value || !value.replace) return value;
-          return value.replace(/<\?(.|[\r\n])*?\?>/g, '');
-        }
-        /**
-         * Взрывает строку в массив, опционально обрезает значения и пропускает пустые
-         *
-         * @param {string} value
-         * @param {string} separator
-         * @param {boolean} trim
-         * @param {boolean} skipEmpty
-         * @returns {array}
-         */
-
-      }, {
-        key: "explode",
-        value: function explode(value) {
-          var _this = this;
-
-          var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
-          var trim = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-          var skipEmpty = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-          value = Type.toString(value);
-          var result = value.split(separator);
-
-          if (!!trim) {
-            result = result.map(function (i) {
-              return _this.trim(i);
-            });
-          }
-
-          if (skipEmpty) {
-            result = result.filter(function (i) {
-              return i !== "";
-            });
+          while (reUnicode.test(string)) {
+            ++result;
           }
 
           return result;
         }
-        /**
-         * Метод для обрезания строк.
-         *
-         * @param {string} value
-         * @param {number} offset
-         * @param {number|null} length
-         * @returns {string}
-         */
-
       }, {
-        key: "cut",
-        value: function cut(value, offset) {
-          var length = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-          value = Type.toString(value);
-          return value.substr(offset, length);
-        }
-        /**
-         * Возвращает позицию подстроки в строке.
-         *
-         * @param {string} needle Подстрока.
-         * @param {string} haystack Строка.
-         * @param {number} offset Смещение.
-         * @param {boolean} insensitive Нечювствительность к регистру.
-         * @param {boolean} last Искать последнюю подстроку.
-         * @returns {number|false} Позиция, с которой начинается первая или последняя найденная подстрока или `false`, если подстрока не найдена.
-         */
-
-      }, {
-        key: "position",
-        value: function position(needle, haystack) {
-          var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-          var insensitive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-          var last = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
-          needle = Type.toString(needle);
-          haystack = Type.toString(haystack);
-
-          if (insensitive) {
-            haystack = haystack.toLowerCase();
-            needle = needle.toLowerCase();
-          }
-
-          var pos = haystack.indexOf(needle, offset);
-
-          if (last) {
-            offset = pos;
-
-            while (true) {
-              var res = haystack.indexOf(needle, offset += 1);
-              if (res == -1) break;
-              pos = res;
-            }
-          }
-
-          return pos >= 0 ? pos : false;
-        }
-        /**
-         * Сравнивкт две строки
-         *
-         * @param {string} value1 Первая строка для сравнения.
-         * @param {string} value2 Вторая строка для сравнения.
-         * @param {number} length Количество сравневаемых символов. Если 0, то сравнивает всю строку.
-         * @param {boolean} insensitive Нечювствительность к регистру.
-         * @returns {boolean} Результат сравнения.
-         */
-
-      }, {
-        key: "compare",
-        value: function compare(value1, value2) {
-          var length = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-          var insensitive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-          value1 = Type.toString(value1);
-          value2 = Type.toString(value2);
-          length = Type.toInteger(length);
-
-          if (length > 0) {
-            value1 = this.cut(value1, 0, length);
-            value2 = this.cut(value2, 0, length);
-          }
-
-          return this.position(value1, value2, 0, insensitive, false) === 0;
+        key: "words",
+        value: function words(string) {
+          return string.match(reUnicodeWords);
         }
       }]);
-      return Text;
+      return Unicode;
     }();
 
     function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
@@ -1480,8 +1094,657 @@
 
           return keepKeys ? resultObject : result;
         }
+      }, {
+        key: "strictIndexOf",
+        value: function strictIndexOf(array, value, fromIndex) {
+          var index = fromIndex - 1;
+          var length = array.length;
+
+          while (++index < length) {
+            if (array[index] === value) {
+              return index;
+            }
+          }
+
+          return -1;
+        }
+      }, {
+        key: "baseIndexOf",
+        value: function baseIndexOf(array, value, fromIndex) {
+          return value === value ? this.strictIndexOf(array, value, fromIndex) : this.baseFindIndex(array, function (value) {
+            return value !== value;
+          }, fromIndex);
+        }
+      }, {
+        key: "baseFindIndex",
+        value: function baseFindIndex(array, predicate, fromIndex, fromRight) {
+          var length = array.length;
+          var index = fromIndex + (fromRight ? 1 : -1);
+
+          while (fromRight ? index-- : ++index < length) {
+            if (predicate(array[index], index, array)) {
+              return index;
+            }
+          }
+
+          return -1;
+        }
+      }, {
+        key: "slice",
+        value: function slice(array, start, end) {
+          var length = array == null ? 0 : array.length;
+
+          if (!length) {
+            return [];
+          }
+
+          start = start == null ? 0 : start;
+          end = end === undefined ? length : end;
+
+          if (start < 0) {
+            start = -start > length ? 0 : length + start;
+          }
+
+          end = end > length ? length : end;
+
+          if (end < 0) {
+            end += length;
+          }
+
+          length = start > end ? 0 : end - start >>> 0;
+          start >>>= 0;
+          var index = -1;
+          var result = new Array(length);
+
+          while (++index < length) {
+            result[index] = array[index + start];
+          }
+
+          return result;
+        }
+        /**
+         * @param {Array} array
+         * @param {number} start
+         * @param {number} [end=array.length]
+         * @returns {Array}
+         */
+
+      }, {
+        key: "castSlice",
+        value: function castSlice(array, start, end) {
+          var length = array.length;
+          end = end === undefined ? length : end;
+          return !start && end >= length ? array : this.slice(array, start, end);
+        }
+        /**
+         * Arrays.chunk(['a', 'b', 'c', 'd'], 2)
+         * // => [['a', 'b'], ['c', 'd']]
+         *
+         * Arrays.chunk(['a', 'b', 'c', 'd'], 3)
+         * // => [['a', 'b', 'c'], ['d']]
+         *
+         * @param {Array} array
+         * @param {number} [size=1]
+         * @returns {Array}
+         */
+
+      }, {
+        key: "chunk",
+        value: function chunk(array) {
+          var size = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+          size = Math.max(Type.toInteger(size), 0);
+          var length = array == null ? 0 : array.length;
+
+          if (!length || size < 1) {
+            return [];
+          }
+
+          var index = 0;
+          var resIndex = 0;
+          var result = new Array(Math.ceil(length / size));
+
+          while (index < length) {
+            result[resIndex++] = this.slice(array, index, index += size);
+          }
+
+          return result;
+        }
       }]);
       return Arrays;
+    }();
+
+    var reEscape = /[&<>'"]/g;
+    var reUnescape = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
+    var escapeEntities = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    };
+    var unescapeEntities = {
+      '&amp;': '&',
+      '&#38;': '&',
+      '&lt;': '<',
+      '&#60;': '<',
+      '&gt;': '>',
+      '&#62;': '>',
+      '&apos;': "'",
+      '&#39;': "'",
+      '&quot;': '"',
+      '&#34;': '"'
+    };
+
+    var Text = /*#__PURE__*/function () {
+      function Text() {
+        babelHelpers.classCallCheck(this, Text);
+      }
+
+      babelHelpers.createClass(Text, null, [{
+        key: "encode",
+
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+        value: function encode(value) {
+          if (Type.isString(value)) {
+            return value.replace(reEscape, function (item) {
+              return escapeEntities[item];
+            });
+          }
+
+          return value;
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "decode",
+        value: function decode(value) {
+          if (Type.isString(value)) {
+            return value.replace(reUnescape, function (item) {
+              return unescapeEntities[item];
+            });
+          }
+
+          return value;
+        }
+        /**
+         *
+         * @param {number} length
+         * @returns {string}
+         */
+
+      }, {
+        key: "getRandom",
+        value: function getRandom() {
+          var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
+          return babelHelpers.toConsumableArray(Array(length)).map(function () {
+            return (~~(Math.random() * 36)).toString(36);
+          }).join('');
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "toCamelCase",
+        value: function toCamelCase(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          var regex = /[-_\s]+(.)?/g;
+
+          if (!regex.test(str)) {
+            return str.match(/^[A-Z]+$/) ? str.toLowerCase() : str[0].toLowerCase() + str.slice(1);
+          }
+
+          str = str.toLowerCase();
+          str = str.replace(regex, function (match, letter) {
+            return letter ? letter.toUpperCase() : '';
+          });
+          return str[0].toLowerCase() + str.substr(1);
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "toPascalCase",
+        value: function toPascalCase(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          return this.capitalize(this.toCamelCase(str));
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "toKebabCase",
+        value: function toKebabCase(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          var matches = str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
+
+          if (!matches) {
+            return str;
+          }
+
+          return matches.map(function (x) {
+            return x.toLowerCase();
+          }).join('-');
+        }
+        /**
+         *
+         * @param {string} str
+         * @returns {string}
+         */
+
+      }, {
+        key: "capitalize",
+        value: function capitalize(str) {
+          if (Type.isEmpty(str)) {
+            return str;
+          }
+
+          return str[0].toUpperCase() + str.substr(1);
+        }
+        /**
+         *
+         * @param {string} symbol
+         * @param {string} string
+         * @returns {boolean}
+         */
+
+      }, {
+        key: "isIn",
+        value: function isIn(symbol, string) {
+          string = Type.toString(string);
+          return string.indexOf(Type.toString(symbol)) !== -1;
+        }
+        /**
+         *
+         * @param {string} value
+         * @param {string|undefined} chars
+         * @returns {string}
+         */
+
+      }, {
+        key: "trim",
+        value: function trim(value) {
+          var chars = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+
+          if (Type.isString(value)) {
+            if (chars === undefined) return value.trim();
+            var strSymbols = this.toArray(value);
+            var chrSymbols = this.toArray(chars);
+            var start = this.charsStartIndex(strSymbols, chrSymbols);
+            var end = this.charsEndIndex(strSymbols, chrSymbols) + 1;
+            return Arrays.castSlice(strSymbols, start, end).join('');
+          }
+
+          return value;
+        }
+      }, {
+        key: "trimLeft",
+        value: function trimLeft(string, chars) {
+          if (string && chars === undefined) {
+            return string[''.trimLeft ? 'trimLeft' : 'trimStart']();
+          }
+
+          if (!string || !chars) {
+            return string || '';
+          }
+
+          var strSymbols = this.toArray(string);
+          var start = this.charsStartIndex(strSymbols, this.toArray(chars));
+          return Arrays.castSlice(strSymbols, start).join('');
+        }
+      }, {
+        key: "trimRight",
+        value: function trimRight(string, chars) {
+          if (string && chars === undefined) {
+            return string[''.trimRight ? 'trimRight' : 'trimEnd']();
+          }
+
+          if (!string || !chars) {
+            return string || '';
+          }
+
+          var strSymbols = this.toArray(string);
+          var end = this.charsEndIndex(strSymbols, this.toArray(chars)) + 1;
+          return Arrays.castSlice(strSymbols, 0, end).join('');
+        }
+      }, {
+        key: "charsStartIndex",
+        value: function charsStartIndex(strSymbols, chrSymbols) {
+          var index = -1;
+          var length = strSymbols.length;
+
+          while (++index < length && Arrays.baseIndexOf(chrSymbols, strSymbols[index], 0) > -1) {}
+
+          return index;
+        }
+      }, {
+        key: "charsEndIndex",
+        value: function charsEndIndex(strSymbols, chrSymbols) {
+          var index = strSymbols.length;
+
+          while (index-- && Arrays.baseIndexOf(chrSymbols, strSymbols[index], 0) > -1) {}
+
+          return index;
+        }
+      }, {
+        key: "toArray",
+        value: function toArray(value) {
+          return Unicode.has(value) ? Unicode.toArray(value) : value.split('');
+        }
+        /**
+         * Заменяет текст внутри части строки.
+         *
+         * @param {string} string Входная строка.
+         * @param {string} replacement Строка замены.
+         * @param {number} start Позиция для начала замены подстроки at.
+         * Если start неотрицателен, то замена начнется с начального смещения в строку.
+         * Если start отрицательный, то замена начнется с начального символа в конце строки.
+         * @param {number|null} length Длина подстроки, подлежащей замене.
+         * Если задано и положительно, то оно представляет собой длину части строки, которая должна быть заменена.
+         * Если он отрицательный, то представляет собой количество символов от конца строки, на котором следует прекратить замену.
+         * Если он не задан, то по умолчанию он будет равен длине строки, то есть завершит замену в конце строки.
+         * Если длина равна нулю, то эта функция будет иметь эффект вставки замены в строку при заданном начальном смещении.
+         *
+         * @returns {string}
+         */
+
+      }, {
+        key: "replaceSubstring",
+        value: function replaceSubstring(string, replacement, start) {
+          var length = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+          string = Type.toString(string);
+          var stringLength = string.length;
+          if (start < 0) start = Math.max(0, stringLength + start);else if (start > stringLength) start = stringLength;
+          if (length !== null && length < 0) length = Math.max(0, stringLength - start + length);else if (length === null || length > stringLength) length = stringLength;
+          if (start + length > stringLength) length = stringLength - start;
+          return string.substr(0, start) + replacement + string.substr(start + length, stringLength - start - length);
+        }
+        /**
+         * Усекает строку от начала до указанного количества символов.
+         *
+         * @param {string} string Строка для обработки.
+         * @param {number} length Максимальная длина усеченной строки, включая маркер обрезки.
+         * @param {string} trimMarker Строка для добавления в начало.
+         * @returns {string}
+         */
+
+      }, {
+        key: "truncateBegin",
+        value: function truncateBegin(string, length) {
+          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+          string = Type.toString(string);
+          var stringLength = string.length;
+          if (stringLength <= length) return string;
+          trimMarker = Type.toString(trimMarker);
+          var trimMarkerLength = trimMarker.length;
+          return this.replaceSubstring(string, trimMarker, 0, -length + trimMarkerLength);
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {number} length
+         * @param {string} trimMarker
+         * @returns {string}
+         */
+
+      }, {
+        key: "truncateMiddle",
+        value: function truncateMiddle(string, length) {
+          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+          string = Type.toString(string);
+          var stringLength = string.length;
+          if (stringLength <= length) return string;
+          trimMarker = Type.toString(trimMarker);
+          var trimMarkerLength = trimMarker.length;
+          var start = Type.toInteger(Math.ceil((length - trimMarkerLength) / 2));
+          var end = length - start - trimMarkerLength;
+          return this.replaceSubstring(string, trimMarker, start, -end);
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {number} length
+         * @param {string} trimMarker
+         * @returns {string}
+         */
+
+      }, {
+        key: "truncateEnd",
+        value: function truncateEnd(string, length) {
+          var trimMarker = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "...";
+          string = Type.toString(string);
+          var stringLength = string.length;
+          if (stringLength <= length) return string;
+          trimMarker = Type.toString(trimMarker);
+          var trimMarkerLength = trimMarker.length;
+          return this.trim(string.substr(0, length - trimMarkerLength)) + trimMarker;
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {object} rules
+         * @param {string} tagStart
+         * @param {string} tagEnd
+         * @returns {string}
+         */
+
+      }, {
+        key: "replaceMacros",
+        value: function replaceMacros(string, rules) {
+          var tagStart = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "#";
+          var tagEnd = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "#";
+
+          if (Type.isObjectLike(rules)) {
+            var macros = {};
+            Object.keys(rules).forEach(function (key) {
+              macros[tagStart + key + tagEnd] = rules[key];
+            });
+            string = Text.replace(string, macros);
+          }
+
+          return string;
+        }
+        /**
+         *
+         * @param {string} string
+         * @param {object} rules
+         * @param {string} flag
+         * @returns {string}
+         */
+
+      }, {
+        key: "replace",
+        value: function replace(string, rules) {
+          var flag = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'g';
+          string = Type.toString(string);
+
+          if (Type.isObjectLike(rules)) {
+            Object.keys(rules).forEach(function (key) {
+              string = string.replace(new RegExp(key, flag), rules[key]);
+            });
+          }
+
+          return string;
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "nl2br",
+        value: function nl2br(value) {
+          if (!value || !value.replace) return value;
+          return value.replace(/([^>])\n/g, '$1<br/>');
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "stripTags",
+        value: function stripTags(value) {
+          if (!value || !value.split) return value;
+          return value.split(/<[^>]+>/g).join('');
+        }
+        /**
+         *
+         * @param {string} value
+         * @returns {string}
+         */
+
+      }, {
+        key: "stripPhpTags",
+        value: function stripPhpTags(value) {
+          if (!value || !value.replace) return value;
+          return value.replace(/<\?(.|[\r\n])*?\?>/g, '');
+        }
+        /**
+         * Взрывает строку в массив, опционально обрезает значения и пропускает пустые
+         *
+         * @param {string} value
+         * @param {string} separator
+         * @param {boolean} trim
+         * @param {boolean} skipEmpty
+         * @returns {array}
+         */
+
+      }, {
+        key: "explode",
+        value: function explode(value) {
+          var _this = this;
+
+          var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
+          var trim = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+          var skipEmpty = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+          value = Type.toString(value);
+          var result = value.split(separator);
+
+          if (!!trim) {
+            result = result.map(function (i) {
+              return _this.trim(i);
+            });
+          }
+
+          if (skipEmpty) {
+            result = result.filter(function (i) {
+              return i !== "";
+            });
+          }
+
+          return result;
+        }
+        /**
+         * Метод для обрезания строк.
+         *
+         * @param {string} value
+         * @param {number} offset
+         * @param {number|null} length
+         * @returns {string}
+         */
+
+      }, {
+        key: "cut",
+        value: function cut(value, offset) {
+          var length = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+          value = Type.toString(value);
+          return value.substr(offset, length);
+        }
+        /**
+         * Возвращает позицию подстроки в строке.
+         *
+         * @param {string} needle Подстрока.
+         * @param {string} haystack Строка.
+         * @param {number} offset Смещение.
+         * @param {boolean} insensitive Нечювствительность к регистру.
+         * @param {boolean} last Искать последнюю подстроку.
+         * @returns {number|false} Позиция, с которой начинается первая или последняя найденная подстрока или `false`, если подстрока не найдена.
+         */
+
+      }, {
+        key: "position",
+        value: function position(needle, haystack) {
+          var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+          var insensitive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+          var last = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+          needle = Type.toString(needle);
+          haystack = Type.toString(haystack);
+
+          if (insensitive) {
+            haystack = haystack.toLowerCase();
+            needle = needle.toLowerCase();
+          }
+
+          var pos = haystack.indexOf(needle, offset);
+
+          if (last) {
+            offset = pos;
+
+            while (true) {
+              var res = haystack.indexOf(needle, offset += 1);
+              if (res == -1) break;
+              pos = res;
+            }
+          }
+
+          return pos >= 0 ? pos : false;
+        }
+        /**
+         * Сравнивкт две строки
+         *
+         * @param {string} value1 Первая строка для сравнения.
+         * @param {string} value2 Вторая строка для сравнения.
+         * @param {number} length Количество сравневаемых символов. Если 0, то сравнивает всю строку.
+         * @param {boolean} insensitive Нечювствительность к регистру.
+         * @returns {boolean} Результат сравнения.
+         */
+
+      }, {
+        key: "compare",
+        value: function compare(value1, value2) {
+          var length = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+          var insensitive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+          value1 = Type.toString(value1);
+          value2 = Type.toString(value2);
+          length = Type.toInteger(length);
+
+          if (length > 0) {
+            value1 = this.cut(value1, 0, length);
+            value2 = this.cut(value2, 0, length);
+          }
+
+          return this.position(value1, value2, 0, insensitive, false) === 0;
+        }
+      }]);
+      return Text;
     }();
 
     var Event = /*#__PURE__*/function () {
@@ -1709,6 +1972,7 @@
     exports.Browser = Browser;
     exports.Text = Text;
     exports.Arrays = Arrays;
+    exports.Unicode = Unicode;
     exports.type = type;
     exports.browser = browser;
     exports.event = event;
