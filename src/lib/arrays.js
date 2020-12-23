@@ -389,4 +389,117 @@ export default class Arrays
 
         return keepKeys ? resultObject : result
     }
+
+    static strictIndexOf(array, value, fromIndex)
+    {
+        let index = fromIndex - 1
+        const { length } = array
+
+        while (++index < length)
+        {
+            if (array[index] === value)
+            {
+                return index
+            }
+        }
+        return -1
+    }
+
+    static baseIndexOf(array, value, fromIndex)
+    {
+        return value === value
+            ? this.strictIndexOf(array, value, fromIndex)
+            : this.baseFindIndex(array, function (value) {
+                return value !== value
+            }, fromIndex)
+    }
+
+    static baseFindIndex(array, predicate, fromIndex, fromRight)
+    {
+        const { length } = array
+        let index = fromIndex + (fromRight ? 1 : -1)
+
+        while ((fromRight ? index-- : ++index < length))
+        {
+            if (predicate(array[index], index, array))
+            {
+                return index
+            }
+        }
+        return -1
+    }
+
+    static slice(array, start, end)
+    {
+        let length = array == null ? 0 : array.length
+        if (!length)
+        {
+            return []
+        }
+        start = start == null ? 0 : start
+        end = end === undefined ? length : end
+
+        if (start < 0)
+        {
+            start = -start > length ? 0 : (length + start)
+        }
+        end = end > length ? length : end
+        if (end < 0)
+        {
+            end += length
+        }
+        length = start > end ? 0 : ((end - start) >>> 0)
+        start >>>= 0
+
+        let index = -1
+        const result = new Array(length)
+        while (++index < length)
+        {
+            result[index] = array[index + start]
+        }
+        return result
+    }
+
+    /**
+     * @param {Array} array
+     * @param {number} start
+     * @param {number} [end=array.length]
+     * @returns {Array}
+     */
+    static castSlice(array, start, end)
+    {
+        const { length } = array
+        end = end === undefined ? length : end
+        return (!start && end >= length) ? array : this.slice(array, start, end)
+    }
+
+    /**
+     * Arrays.chunk(['a', 'b', 'c', 'd'], 2)
+     * // => [['a', 'b'], ['c', 'd']]
+     *
+     * Arrays.chunk(['a', 'b', 'c', 'd'], 3)
+     * // => [['a', 'b', 'c'], ['d']]
+     *
+     * @param {Array} array
+     * @param {number} [size=1]
+     * @returns {Array}
+     */
+    static chunk(array, size = 1)
+    {
+        size = Math.max(Type.toInteger(size), 0)
+        const length = array == null ? 0 : array.length
+        if (!length || size < 1)
+        {
+            return []
+        }
+        let index = 0
+        let resIndex = 0
+        const result = new Array(Math.ceil(length / size))
+
+        while (index < length)
+        {
+            result[resIndex++] = this.slice(array, index, (index += size))
+        }
+        return result
+    }
 }

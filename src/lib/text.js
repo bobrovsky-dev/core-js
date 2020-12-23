@@ -1,4 +1,6 @@
 import Type from './type'
+import Unicode from "./unicode"
+import Arrays from "./arrays"
 
 const reEscape = /[&<>'"]/g
 
@@ -159,14 +161,79 @@ export default class Text
     /**
      *
      * @param {string} value
+     * @param {string|undefined} chars
      * @returns {string}
      */
-    static trim(value)
+    static trim(value, chars = undefined)
     {
         if (Type.isString(value))
-            return value.trim()
+        {
+            if (chars === undefined)
+                return value.trim()
+
+            const strSymbols = this.toArray(value)
+            const chrSymbols = this.toArray(chars)
+            const start = this.charsStartIndex(strSymbols, chrSymbols)
+            const end = this.charsEndIndex(strSymbols, chrSymbols) + 1
+
+            return Arrays.castSlice(strSymbols, start, end).join('')
+        }
 
         return value
+    }
+
+    static trimLeft(string, chars)
+    {
+        if (string && chars === undefined)
+        {
+            return string[(''.trimLeft ? 'trimLeft' : 'trimStart')]()
+        }
+        if (!string || !chars)
+        {
+            return (string || '')
+        }
+        const strSymbols = this.toArray(string)
+        const start = this.charsStartIndex(strSymbols, this.toArray(chars))
+        return Arrays.castSlice(strSymbols, start).join('')
+    }
+
+    static trimRight(string, chars)
+    {
+        if (string && chars === undefined)
+        {
+            return string[(''.trimRight ? 'trimRight': 'trimEnd')]()
+        }
+        if (!string || !chars)
+        {
+            return (string || '')
+        }
+        const strSymbols = this.toArray(string)
+        const end = this.charsEndIndex(strSymbols, this.toArray(chars)) + 1
+        return Arrays.castSlice(strSymbols, 0, end).join('')
+    }
+
+    static charsStartIndex(strSymbols, chrSymbols)
+    {
+        let index = -1
+        const length = strSymbols.length
+
+        while (++index < length && Arrays.baseIndexOf(chrSymbols, strSymbols[index], 0) > -1) {}
+        return index
+    }
+
+    static charsEndIndex(strSymbols, chrSymbols)
+    {
+        let index = strSymbols.length
+
+        while (index-- && Arrays.baseIndexOf(chrSymbols, strSymbols[index], 0) > -1) {}
+        return index
+    }
+
+    static toArray(value)
+    {
+        return Unicode.has(value)
+            ? Unicode.toArray(value)
+            : value.split('')
     }
 
     /**
