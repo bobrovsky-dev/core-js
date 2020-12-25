@@ -166,32 +166,29 @@ export default class Text
      */
     static trim(value, chars = undefined)
     {
-        if (Type.isString(value))
-        {
-            if (chars === undefined)
-                return value.trim()
+        value = Type.toString(value)
 
-            const strSymbols = this.toArray(value)
-            const chrSymbols = this.toArray(chars)
-            const start = this.charsStartIndex(strSymbols, chrSymbols)
-            const end = this.charsEndIndex(strSymbols, chrSymbols) + 1
+        if (chars === undefined)
+            return value.trim()
 
-            return Arrays.castSlice(strSymbols, start, end).join('')
-        }
+        const strSymbols = this.toArray(value)
+        const chrSymbols = this.toArray(chars)
+        const start = this.charsStartIndex(strSymbols, chrSymbols)
+        const end = this.charsEndIndex(strSymbols, chrSymbols) + 1
 
-        return value
+        return Arrays.castSlice(strSymbols, start, end).join('')
     }
 
     static trimLeft(string, chars)
     {
-        if (string && chars === undefined)
-        {
+        string = Type.toString(string)
+
+        if (string.length && chars === undefined)
             return string[(''.trimLeft ? 'trimLeft' : 'trimStart')]()
-        }
-        if (!string || !chars)
-        {
-            return (string || '')
-        }
+
+        if (!string.length || !chars)
+            return ""
+
         const strSymbols = this.toArray(string)
         const start = this.charsStartIndex(strSymbols, this.toArray(chars))
         return Arrays.castSlice(strSymbols, start).join('')
@@ -199,14 +196,14 @@ export default class Text
 
     static trimRight(string, chars)
     {
-        if (string && chars === undefined)
-        {
+        string = Type.toString(string)
+
+        if (string.length && chars === undefined)
             return string[(''.trimRight ? 'trimRight': 'trimEnd')]()
-        }
-        if (!string || !chars)
-        {
-            return (string || '')
-        }
+
+        if (!string.length || !chars)
+            return ""
+
         const strSymbols = this.toArray(string)
         const end = this.charsEndIndex(strSymbols, this.toArray(chars)) + 1
         return Arrays.castSlice(strSymbols, 0, end).join('')
@@ -422,7 +419,7 @@ export default class Text
     }
 
     /**
-     * Взрывает строку в массив, опционально обрезает значения и пропускает пустые
+     * Превращает строку в массив, обрезает значения и пропускает пустые
      *
      * @param {string} value
      * @param {string} separator
@@ -501,7 +498,7 @@ export default class Text
     }
 
     /**
-     * Сравнивкт две строки
+     * Сравнивает две строки
      *
      * @param {string} value1 Первая строка для сравнения.
      * @param {string} value2 Вторая строка для сравнения.

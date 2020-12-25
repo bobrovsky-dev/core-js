@@ -121,8 +121,11 @@ export default class Arrays
      */
     static keyExists(key, array)
     {
-        if (Type.isArray(array) || Type.isObjectLike(array))
+        if (Type.isArray(array))
             return array.hasOwnProperty(key)
+
+        if (Type.isObjectLike(array))
+            return key in array
 
         return false
     }
